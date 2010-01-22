@@ -1,4 +1,4 @@
-package com.vaadin.contrib.googlemapwidget;
+package org.vaadin.hezamu.googlemapwidget;
 
 import java.awt.geom.Point2D;
 import java.io.ByteArrayInputStream;
@@ -7,14 +7,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.vaadin.hezamu.googlemapwidget.overlay.BasicMarkerSource;
+import org.vaadin.hezamu.googlemapwidget.overlay.InfoWindowTab;
+import org.vaadin.hezamu.googlemapwidget.overlay.Marker;
+import org.vaadin.hezamu.googlemapwidget.overlay.MarkerSource;
+import org.vaadin.hezamu.googlemapwidget.overlay.PolyOverlay;
+import org.vaadin.hezamu.googlemapwidget.overlay.Polygon;
+import org.vaadin.hezamu.googlemapwidget.widgetset.client.ui.VGoogleMap;
+
 import com.vaadin.Application;
-import com.vaadin.contrib.googlemapwidget.overlay.BasicMarkerSource;
-import com.vaadin.contrib.googlemapwidget.overlay.InfoWindowTab;
-import com.vaadin.contrib.googlemapwidget.overlay.Marker;
-import com.vaadin.contrib.googlemapwidget.overlay.MarkerSource;
-import com.vaadin.contrib.googlemapwidget.overlay.PolyOverlay;
-import com.vaadin.contrib.googlemapwidget.overlay.Polygon;
-import com.vaadin.contrib.googlemapwidget.widgetset.client.ui.VGoogleMap;
 import com.vaadin.terminal.ApplicationResource;
 import com.vaadin.terminal.DownloadStream;
 import com.vaadin.terminal.PaintException;

@@ -1,4 +1,4 @@
-package com.vaadin.contrib.googlemapwidget.overlay;
+package org.vaadin.hezamu.googlemapwidget.overlay;
 
 import java.awt.geom.Point2D;
 

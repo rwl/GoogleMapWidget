@@ -1,9 +1,10 @@
-package com.vaadin.contrib.googlemapwidget.overlay;
+package org.vaadin.hezamu.googlemapwidget.overlay;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.contrib.googlemapwidget.GoogleMap;
+import org.vaadin.hezamu.googlemapwidget.GoogleMap;
+
 
 public class BasicMarkerSource implements MarkerSource {
 

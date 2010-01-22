@@ -16,13 +16,13 @@
 			<description>
 			Vaadin application class to start</description>
 			<param-name>application</param-name>
-			<param-value>com.vaadin.contrib.googlemapwidget.MapwidgetApplication</param-value>
+			<param-value>org.vaadin.hezamu.googlemapwidget.GoogleMapWidgetApp</param-value>
 		</init-param>
 		<init-param>
 			<description>
 			Application widgetset</description>
 			<param-name>widgetset</param-name>
-			<param-value>com.vaadin.contrib.googlemapwidget.widgetset.GooglemapwidgetWidgetset</param-value>
+			<param-value>org.vaadin.hezamu.googlemapwidget.widgetset.GooglemapwidgetWidgetset</param-value>
 		</init-param>
 	</servlet>
 	<servlet-mapping>

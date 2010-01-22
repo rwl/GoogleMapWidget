@@ -1,0 +1,21 @@
+Summary: Google map widget
+Description:
+A Vaadin component that allows you to add Google maps to your application. The component supports a subset of the maps API (eg. click and move events, lazy loaded markers with custom icons, tabbed info windows on the markers, containing other Vaadin components, and polylines and polygons), but it should cover most of the normal use cases.
+
+Highlights
+- Screenshot 
+- Code example
+// Create a new map instance centered on the IT Mill offices
+GoogleMap googleMap = new GoogleMap(getApplication(), new Point2D.Double(22.3, 60.4522), 8);
+googleMap.setWidth("640px");
+googleMap.setHeight("480px");\n
+
+// Create a marker at the IT Mill offices
+googleMap.addMarker(new BasicMarker(1L, new Point2D.Double(22.3, 60.4522), "Test marker"));
+
+
+Links
+  - Forum post: http://vaadin.com/forum/-/message_boards/message/95530
+  - Repository: http://dev.vaadin.com/browser/contrib/GoogleMapWidget
+  - Live demo: http://hezamu.virtuallypreinstalled.com/WidgetTest
+
