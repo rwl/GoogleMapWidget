@@ -403,7 +403,7 @@ public class VGoogleMap extends Composite implements Paintable,
 		boolean clickable = polyUIDL.getBooleanAttribute("clickable");
 
 		return new Polyline(points, color, weight, opacity, PolylineOptions
-				.newInstance(clickable));
+				.newInstance(clickable, false));
 	}
 
 	private Polygon polygonFromUIDL(UIDL polyUIDL) {
