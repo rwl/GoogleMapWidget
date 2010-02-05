@@ -217,7 +217,11 @@ public class VGoogleMap extends Composite implements Paintable,
 		}
 
 		if (uidl.hasAttribute("marker")) {
-			Marker marker = knownMarkers.get(uidl.getStringAttribute("marker"));
+			// When adding the markers we get the ID from JSONString.toString()
+			// which includes quotation marks around the ID.
+			String markerId = "\"" + uidl.getStringAttribute("marker") + "\"";
+
+			Marker marker = knownMarkers.get(markerId);
 
 			for (final Iterator<Object> it = uidl.getChildIterator(); it
 					.hasNext();) {
