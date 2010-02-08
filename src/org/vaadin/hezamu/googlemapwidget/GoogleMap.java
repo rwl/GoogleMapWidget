@@ -103,6 +103,10 @@ public class GoogleMap extends AbstractComponent {
 	 */
 	public GoogleMap(Application application) {
 		application.addResource(markerResource);
+
+		// Greewich Royal Observatory
+		center = new Point2D.Double(-0.001475, 51.477811);
+		zoom = 14;
 	}
 
 	/**
