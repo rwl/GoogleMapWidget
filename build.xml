@@ -6,16 +6,25 @@
 		Update based on your project structure, by default this buildfile assumes that you 
 		1. use WebContent under your project's root directory
 		2. WebContent/WEB-INF/lib/itmill-toolkit-6.3.0.jar exists
-		3. WebContent/WEB-INF/src contains your project source files
-		4. gwt directory contains extracted GWT distribution for your platform (windows, linux or mac)
+		3. WebContent/WEB-INF/lib/gwt-maps.jar exists
+		4. WebContent/WEB-INF/src contains your project source files
+		5. gwt directory contains extracted GWT distribution for your platform (windows, linux or mac)
 	-->
 	<target name="configure">
 		<!-- which platform we are in, possible values are windows, linux and mac -->
 		<!-- With vaadin 6.3 and GWT 2.0 we don't need to differentiate between platforms -->
 		<!-- <property name="gwt-platform" value="mac" /> -->
 		
+		<!-- dir to extra files !!! CHANGE THIS !!!
+		give the path to: 
+		 /license-apache-2.0.txt 
+		 /gwt/gwt-user.jar 
+		 /gwt/gwt-dev.jar 
+		--> 
+		<property name="extras-location" value="/Users/petri/Documents" />
+		
 		<!-- where platform specific GWT distribution is located -->
-		<property name="gwt-location" value="/Users/petri/Documents/gwt" />
+		<property name="gwt-location" value="${extras-location}/gwt" />
 		
 		<!-- where Toolkit jar is located -->
 		<property name="toolkit-jar-location" value="WebContent/WEB-INF/lib/vaadin-6.3.0.jar" />
@@ -33,7 +42,7 @@
 		<property name="zip-destination" value="builds/${filename}.zip" />
 		
 		<!-- where the manual is -->
-		<property name="manual-filename" value="doc/Vaadin ColorPicker Manual.pdf" />
+		<!--<property name="manual-filename" value="doc/Vaadin ColorPicker Manual.pdf" /> -->
 		
 		<!-- where project client-side widgetset source files are located -->
 		<property name="client-side-src-location" value="src" />
@@ -48,7 +57,7 @@
 		<property name="result-dir" value="${base}build/result/" />
 		
 		<!-- License files -->
-		<property name="license-apache2" value="/Users/petri/Documents/license-apache-2.0.txt"/>
+		<property name="license-apache2" value="${extras-location}/license-apache-2.0.txt"/>
 		<!-- <property name="license-agpl" value="doc/license-agpl-3.0.txt" />
 		<property name="license-cval" value="doc/license-cval-1.0.txt" />
 		<property name="license-general" value="doc/licensing.txt" /> -->
@@ -120,7 +129,6 @@
 		 
 		<!-- Copy license files -->
 		<copy todir="${build-path}/temp" file="${license-apache2}" />
-		
 		<!-- <copy todir="${build-path}/temp" file="${license-general}" />
 		<copy todir="${build-path}/temp" file="${license-agpl}" />
 		<copy todir="${build-path}/temp" file="${license-cval}" /> -->
@@ -146,17 +154,3 @@ Vaadin-Widgetsets:
 		<delete dir="${build-path}/temp" />
 	</target>
 </project>
-
-	
-	
-	
-	<!--
-	<target name="package-directory-zip" depends="package-war">
-	  <zip destfile="build/GoogleMap.war" webxml="WebContent/WEB-INF/web.xml">
-	   <fileset dir="WebContent" includes="VAADIN/**" />
-	   <classes dir="build/classes" />
-	   <lib dir="WebContent/WEB-INF/lib" />
-	  </zip>
-	 </target>
-	
-</project> -->
