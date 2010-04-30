@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.vaadin.hezamu.googlemapwidget.overlay.BasicMarker;
 import org.vaadin.hezamu.googlemapwidget.overlay.BasicMarkerSource;
 import org.vaadin.hezamu.googlemapwidget.overlay.InfoWindowTab;
 import org.vaadin.hezamu.googlemapwidget.overlay.Marker;
@@ -45,6 +46,10 @@ public class GoogleMap extends AbstractComponent {
 	private List<MapMoveListener> moveListeners = new ArrayList<MapMoveListener>();
 
 	private List<MapClickListener> mapClickListeners = new ArrayList<MapClickListener>();
+	
+	private List<MarkerClickListener> markerListeners = new ArrayList<MarkerClickListener>();
+	
+	private List<MarkerMovedListener> markerMovedListeners = new ArrayList<MarkerMovedListener>();
 
 	private MarkerSource markerSource = null;
 
@@ -94,6 +99,10 @@ public class GoogleMap extends AbstractComponent {
 			return "text/plain";
 		}
 	};
+
+	
+
+	
 
 	/**
 	 * Construct a new instance of the map with given size.
@@ -268,9 +277,30 @@ public class GoogleMap extends AbstractComponent {
 		if (variables.containsKey("marker")) {
 			clickedMarker = markerSource.getMarker(variables.get("marker")
 					.toString());
-			if (clickedMarker != null
-					&& clickedMarker.getInfoWindowContent() != null) {
-				requestRepaint();
+			if (clickedMarker != null){
+				fireMarkerClickedEvent(clickedMarker); 
+				if(clickedMarker.getInfoWindowContent() != null) {
+					requestRepaint();
+				}
+
+			}
+		}
+		
+		if(variables.containsKey("markerMovedId")){
+		
+			String markerID = variables.get("markerMovedId").toString().replaceAll("\"",""); 
+			List<Marker> markers = markerSource.getMarkers(); 
+			
+			for(Marker mark: markers){
+				if(mark.getId() == Long.parseLong(markerID)){
+										
+					double lat = new Double(variables.get("markerMovedLat").toString());
+					double lng = new Double(variables.get("markerMovedLong").toString());
+					mark.getLatLng().setLocation(lng, lat);
+					
+					fireMarkerMovedEvent(mark); 
+					break;
+				} 
 			}
 		}
 	}
@@ -287,7 +317,21 @@ public class GoogleMap extends AbstractComponent {
 			listener.mapClicked(clickPos);
 		}
 	}
+	
+	private void fireMarkerClickedEvent(Marker clickedMarker){
+		for(MarkerClickListener m: markerListeners){
+			m.markerClicked(clickedMarker); 
+			
+		}
+	}
 
+	private void fireMarkerMovedEvent(Marker movedMarker){
+		for(MarkerMovedListener m: markerMovedListeners){
+			m.markerMoved(movedMarker); 
+			
+		}
+	}
+	
 	/**
 	 * Interface for listening map move and zoom events.
 	 * 
@@ -325,6 +369,37 @@ public class GoogleMap extends AbstractComponent {
 		 */
 		public void mapClicked(Point2D.Double clickPos);
 	}
+	
+	/**
+	 * Interface for listening marker click events.
+	 *
+	 */
+	public interface MarkerClickListener {
+		/**
+		 * Handle a MarkerClickEvent.
+		 * 
+		 * @param clickedMarker
+		 *            the marker that was clicked.
+		 * 
+		 */
+		public void markerClicked(Marker clickedMarker);
+	}
+	
+	/**
+	 * Interface for listening marker move events.
+	 * 
+	 */
+	public interface MarkerMovedListener {
+		/**
+		 * Handle a MarkerMovedEvent.
+		 * 
+		 * @param movedMarker
+		 *            the marker that was moved.
+		 * 
+		 */
+		public void markerMoved(Marker movedMarker);
+	}
+
 
 	/**
 	 * Register a new {@link MapClickListener}.
@@ -361,6 +436,37 @@ public class GoogleMap extends AbstractComponent {
 			moveListeners.add(listener);
 		}
 	}
+	
+	/**
+	 * Register a new {@link MarkerMovedListener}.
+	 * 
+	 * NOTE!! The marker that is clicked MUST have some information 
+	 * window content! This is due to the implementation of the 
+	 * Widget, as the marker click events do not propagate if 
+	 * there is not a information window opened.
+	 * 
+	 * @param listener
+	 *            new {@link MarkerClickListener} to register
+	 */
+	public void addListener(MarkerClickListener listener) {
+		if (!markerListeners.contains(listener)) {
+			markerListeners.add(listener);
+		}
+	}
+	
+	/**
+	 * Register a new {@link MarkerMovedListener}.
+	 * 
+	 * 
+	 * 
+	 * @param listener
+	 *            new {@link MarkerMovedListener} to register
+	 */
+	public void addListener(MarkerMovedListener listener) {
+		if (!markerMovedListeners.contains(listener)) {
+			markerMovedListeners.add(listener);
+		}
+	}
 
 	/**
 	 * Deregister a {@link MapMoveListener}.
@@ -371,6 +477,30 @@ public class GoogleMap extends AbstractComponent {
 	public void removeListener(MapMoveListener listener) {
 		if (moveListeners.contains(listener)) {
 			moveListeners.remove(listener);
+		}
+	}
+	
+	/**
+	 * Deregister a {@link MarkerClickListener}.
+	 * 
+	 * @param listener
+	 *            {@link MarkerClickListener} to deregister
+	 */
+	public void removeListener(MarkerClickListener listener) {
+		if (markerListeners.contains(listener)) {
+			markerListeners.remove(listener);
+		}
+	}
+	
+	/**
+	 * Deregister a  {@link MarkerMovedListener}.
+	 * 
+	 * @param listener
+	 *            the {@link MarkerMovedListener} to deregister
+	 */
+	public void removeListener(MarkerMovedListener listener) {
+		if (markerMovedListeners.contains(listener)) {
+			markerMovedListeners.remove(listener);
 		}
 	}
 
@@ -541,7 +671,29 @@ public class GoogleMap extends AbstractComponent {
 		}
 
 		markerSource.addMarker(marker);
+		requestRepaint(); 
 	}
+	
+	 /**
+     * Removes the marker from the map
+     * 
+     * @param marker
+     */
+    public void removeMarker(Marker marker) {
+
+        if (markerSource != null) {
+            markerSource.getMarkers().remove(marker);
+            requestRepaint();
+        }
+    }
+
+    public void removeAllMarkers() {
+
+        if (markerSource != null) {
+            markerSource.getMarkers().clear(); 
+            requestRepaint();
+        }
+    }
 
 	public void setScrollWheelZoomEnabled(boolean isEnabled) {
 		scrollWheelZoomEnabled = isEnabled;

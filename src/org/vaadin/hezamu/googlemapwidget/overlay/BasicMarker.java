@@ -86,4 +86,5 @@ public class BasicMarker implements Marker {
 	public void setDraggable(boolean draggable) {
 		this.draggable = draggable;
 	}
+	
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -37,6 +38,7 @@ import com.google.gwt.maps.client.control.SmallZoomControl;
 import com.google.gwt.maps.client.event.MapClickHandler;
 import com.google.gwt.maps.client.event.MapMoveEndHandler;
 import com.google.gwt.maps.client.event.MarkerClickHandler;
+import com.google.gwt.maps.client.event.MarkerDragEndHandler;
 import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.geom.MercatorProjection;
@@ -64,7 +66,7 @@ import com.vaadin.terminal.gwt.client.UIDL;
  * server are shown as HTML and mouse clicks are sent to the server.
  */
 public class VGoogleMap extends Composite implements Paintable,
-		MapClickHandler, MapMoveEndHandler {
+		MapClickHandler, MapMoveEndHandler, MarkerDragEndHandler {
 
 	/** Set the CSS class name to allow styling. */
 	public static final String CLASSNAME = "v-googlemap";
@@ -495,6 +497,25 @@ public class VGoogleMap extends Composite implements Paintable,
 
 		eggMarker.setVisible(map.getZoomLevel() >= 13);
 	}
+	
+	@Override
+	public void onDragEnd(MarkerDragEndEvent event) {
+		Marker marker = (Marker) event.getSource();
+		
+		Set<String> keys = knownMarkers.keySet();
+		for(String key : keys ){
+	
+			//Find the key for the moved marker
+			if(knownMarkers.get(key).equals(marker)){
+				client.updateVariable(paintableId, "markerMovedId", key, false);
+				client.updateVariable(paintableId, "markerMovedLat", marker.getLatLng().getLatitude(), false);
+				client.updateVariable(paintableId, "markerMovedLong", marker.getLatLng().getLongitude(), true);
+				break;
+			}
+			
+		}
+		
+	}
 
 	protected void markerClicked(String mId) {
 		client.updateVariable(paintableId, "marker", mId, true);
@@ -722,10 +743,12 @@ public class VGoogleMap extends Composite implements Paintable,
 
 		private void handleMarkerJSON(JSONArray array) {
 			synchronized (knownMarkers) {
+			
 				JSONValue value;
 				long startTime = System.currentTimeMillis();
 				int initSize = knownMarkers.size();
-
+				List<String> markersFromThisUpdate = new ArrayList<String>();
+				
 				for (int i = 0; i < array.size(); i++) {
 					JSONObject jsMarker;
 					JSONString jsMID, jsTitle, jsIcon;
@@ -744,6 +767,9 @@ public class VGoogleMap extends Composite implements Paintable,
 						continue;
 					}
 
+					//Add maker to list of markers in this update
+					markersFromThisUpdate.add(jsMID.toString()); 					
+					
 					// Skip known markers
 					if (knownMarkers.containsKey(jsMID.toString())) {
 						continue;
@@ -801,7 +827,11 @@ public class VGoogleMap extends Composite implements Paintable,
 
 					if (marker != null) {
 						map.addOverlay(marker);
-
+					
+						// Add dragEnd handlers to marker
+						marker.addMarkerDragEndHandler(VGoogleMap.this);
+						
+						
 						// Read boolean telling if marker has a info window
 						if ((value = jsMarker.get("info")) != null) {
 							if ((jsHasInfo = value.isBoolean()) != null
@@ -809,8 +839,11 @@ public class VGoogleMap extends Composite implements Paintable,
 								marker
 										.addMarkerClickHandler(new InfoWindowOpener(
 												jsMID.stringValue()));
+								
+								
 							}
 						}
+						
 
 						knownMarkers.put(jsMID.toString(), marker);
 					}
@@ -826,6 +859,14 @@ public class VGoogleMap extends Composite implements Paintable,
 					log("" + newMarkers + " markers added in " + dur + "ms: "
 							+ dur / newMarkers + "ms per marker");
 				}
+				
+				// Remove markers that wasn't in the update (i.e. removed on server side)
+				for(String mID:knownMarkers.keySet()){
+					if(!markersFromThisUpdate.contains(mID)){
+						map.removeOverlay(knownMarkers.get(mID)); 
+					}
+				}
+				
 			}
 		}
 	}
@@ -894,4 +935,6 @@ public class VGoogleMap extends Composite implements Paintable,
 
 		return rotated;
 	}
+
+	
 }
