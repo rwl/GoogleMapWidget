@@ -123,6 +123,7 @@
 		
 		<!-- Copy jars -->
 		<copy todir="${build-path}/temp" file="${build-path}/${filename}.jar" />		
+		<copy todir="${build-path}/temp" file="${gwt-maps}" />
 		
 		<!-- Copy manual -->
 		<!--<copy todir="${build-path}/temp" file="${manual-filename}" /> -->
@@ -132,6 +133,10 @@
 		<!-- <copy todir="${build-path}/temp" file="${license-general}" />
 		<copy todir="${build-path}/temp" file="${license-agpl}" />
 		<copy todir="${build-path}/temp" file="${license-cval}" /> -->
+		
+		<!-- Cpoy readme -->
+		<copy todir="${build-path}/temp" file="./README.txt" />
+		
 		
 		<!-- Make the zip manifest -->
 		<mkdir dir="${build-path}/temp/META-INF"/>
