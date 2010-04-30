@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project> <!-- minimal DTD to make Eclipse shut up about the file not having a DTD or Schema (it's a bug in Eclipse) -->
+<project name="GoogleMapWidget" basedir="." default="compile-googlemapwidget">
+
+	<!-- 
+		Update based on your project structure, by default this buildfile assumes that you 
+		1. use WebContent under your project's root directory
+		2. WebContent/WEB-INF/lib/itmill-toolkit-6.3.0.jar exists
+		3. WebContent/WEB-INF/src contains your project source files
+		4. gwt directory contains extracted GWT distribution for your platform (windows, linux or mac)
+	-->
+	<target name="configure">
+		<!-- which platform we are in, possible values are windows, linux and mac -->
+		<!-- With vaadin 6.3 and GWT 2.0 we don't need to differentiate between platforms -->
+		<!-- <property name="gwt-platform" value="mac" /> -->
+		
+		<!-- where platform specific GWT distribution is located -->
+		<property name="gwt-location" value="/Users/petri/Documents/gwt" />
+		
+		<!-- where Toolkit jar is located -->
+		<property name="toolkit-jar-location" value="WebContent/WEB-INF/lib/vaadin-6.3.0.jar" />
+		
+		<!-- The gwt-maps jar -->
+		<property name="gwt-maps" value="WebContent/WEB-INF/lib/gwt-maps.jar" />
+		
+		<!-- The version of the build -->
+		<property name="version" value="0.9.1" />
+		
+		<!-- The filename of the built packages -->
+		<property name="filename" value="googlemapwidget-${version}"></property>
+		
+		<!-- where to generate the compiled ZIP file -->
+		<property name="zip-destination" value="builds/${filename}.zip" />
+		
+		<!-- where the manual is -->
+		<property name="manual-filename" value="doc/Vaadin ColorPicker Manual.pdf" />
+		
+		<!-- where project client-side widgetset source files are located -->
+		<property name="client-side-src-location" value="src" />
+			
+		<!-- where to generate compiled javascript and theme files -->
+		<property name="client-side-destination" value="WebContent/VAADIN/widgetsets" />
+		
+		<!-- where the jar builds should be put -->
+		<property name="build-path" value="builds" />
+		
+		<!-- what to include in the Zip file -->
+		<property name="result-dir" value="${base}build/result/" />
+		
+		<!-- License files -->
+		<property name="license-apache2" value="/Users/petri/Documents/license-apache-2.0.txt"/>
+		<!-- <property name="license-agpl" value="doc/license-agpl-3.0.txt" />
+		<property name="license-cval" value="doc/license-cval-1.0.txt" />
+		<property name="license-general" value="doc/licensing.txt" /> -->
+		
+	</target>
+
+	
+	<target name="init" depends="configure">
+
+		<echo>Configured for ${gwt-platform} platform.</echo>
+		<echo>Requirements for classpath:</echo>
+		<echo>  ${gwt-location}/gwt-dev.jar</echo>
+		<echo>  ${gwt-location}/gwt-user.jar</echo>
+		<echo>  ${toolkit-jar-location}</echo>
+		<echo>  ${gwt-maps}</echo>
+		<echo>  ${client-side-src-location}</echo>
+		<echo>Output will be written into ${client-side-destination}</echo>
+		<echo>Note, if you have created your own widgetset, please modify target compile-my-widgetset first.</echo>
+
+		<!-- Construct classpath -->
+		<path id="compile.classpath">
+			<pathelement path="${client-side-src-location}" />
+			<pathelement path="${gwt-maps}" />
+			<pathelement path="${toolkit-jar-location}" />
+			<pathelement path="${gwt-location}/gwt-user.jar" />
+			<pathelement path="${gwt-location}/gwt-dev.jar" />
+			
+		</path>
+
+	</target>
+		
+	<target name="compile-googlemapwidget" depends="init">	
+		<mkdir dir="WebContent/WEB-INF/classes"/>
+		<javac srcdir="${client-side-src-location}" destdir="WebContent/WEB-INF/classes">
+			<classpath>
+				<path refid="compile.classpath"/>
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="jar" depends="compile-googlemapwidget">
+		<mkdir dir="${build-path}/temp"/>
+		<copy todir="${build-path}/temp">
+			<fileset dir="WebContent/WEB-INF/classes" excludes="**/*.java"/>
+			<fileset dir="${client-side-src-location}" />		
+		</copy>		
+				
+		<jar jarfile="${build-path}/${filename}.jar" basedir="${build-path}/temp">
+			<manifest>
+						<attribute name="Vaadin-Package-Version" value="1" />
+						<attribute name="Vaadin-Widgetsets" value="org.vaadin.hezamu.googlemapwidget.widgetset.GooglemapwidgetWidgetset" />
+						<attribute name="Implementation-Title" value="GoogleMapWidget" />
+						<attribute name="Implementation-Version" value="${version}" />
+						<attribute name="Implementation-Vendor" value="Henri Muurimaa" />					
+			</manifest>
+		</jar>
+				
+		<delete dir="${build-path}/temp" />
+	</target>			
+	
+	<target name="package" depends="jar">
+		<mkdir dir="${build-path}/temp"/>
+		
+		<!-- Copy jars -->
+		<copy todir="${build-path}/temp" file="${build-path}/${filename}.jar" />		
+		
+		<!-- Copy manual -->
+		<!--<copy todir="${build-path}/temp" file="${manual-filename}" /> -->
+		 
+		<!-- Copy license files -->
+		<copy todir="${build-path}/temp" file="${license-apache2}" />
+		
+		<!-- <copy todir="${build-path}/temp" file="${license-general}" />
+		<copy todir="${build-path}/temp" file="${license-agpl}" />
+		<copy todir="${build-path}/temp" file="${license-cval}" /> -->
+		
+		<!-- Make the zip manifest -->
+		<mkdir dir="${build-path}/temp/META-INF"/>
+		<echo file="${build-path}/temp/META-INF/MANIFEST.MF">Vaadin-Addon: ${filename}.jar
+Vaadin-Package-Version: 1
+Implementation-Title: GoogleMapWidget
+Implementation-Version: ${version}
+Implementation-Vendor: Henri Muurimaa
+Vaadin-Widgetsets: 
+		</echo>
+		
+		<!-- make the zip directory package -->
+		<zip destfile="${zip-destination}">	
+			<zipfileset dir="${build-path}/temp/" includes="*.jar" />
+			<zipfileset dir="${build-path}/temp/" includes="*.pdf" />
+			<zipfileset dir="${build-path}/temp/" includes="*.txt" />
+			<zipfileset dir="${build-path}/temp/" includes="META-INF/MANIFEST.MF" />
+		</zip>
+		
+		<delete dir="${build-path}/temp" />
+	</target>
+</project>
+
+	
+	
+	
+	<!--
+	<target name="package-directory-zip" depends="package-war">
+	  <zip destfile="build/GoogleMap.war" webxml="WebContent/WEB-INF/web.xml">
+	   <fileset dir="WebContent" includes="VAADIN/**" />
+	   <classes dir="build/classes" />
+	   <lib dir="WebContent/WEB-INF/lib" />
+	  </zip>
+	 </target>
+	
+</project> -->

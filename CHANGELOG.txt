@@ -1,4 +1,4 @@
---- v. 0.9.1 ---
+--- v. 0.9.1 --- Petri Heinonen 
 + Added methods for removing a single marker and all markers
-+ Added handler to catch marker move events that fires when a marker has been moved to a new location
++ Added handler to catch marker move events that fires when a marker has been moved to a new location (feature sponsored by Propentus Oy)
 + Added handler to catch marker click events, works only if marker has information window content for now. 
