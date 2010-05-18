@@ -53,10 +53,13 @@ import com.google.gwt.maps.client.overlay.PolygonOptions;
 import com.google.gwt.maps.client.overlay.Polyline;
 import com.google.gwt.maps.client.overlay.PolylineOptions;
 import com.google.gwt.user.client.Command;
+
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.UIDL;
@@ -73,13 +76,15 @@ public class VGoogleMap extends Composite implements Paintable,
 
 	public static final String CLICK_EVENT_IDENTIFIER = "click";
 
+	private static Boolean loadingApi = false;
+
 	/** The client side widget identifier */
 	protected String paintableId;
 
 	/** Reference to the server connection object. */
 	protected ApplicationConnection client;
 
-	private final MapWidget map = new MapWidget();
+	private MapWidget map = null;  
 
 	private final Map<String, Marker> knownMarkers = new HashMap<String, Marker>();
 
@@ -94,6 +99,14 @@ public class VGoogleMap extends Composite implements Paintable,
 	private Marker eggMarker;
 
 	private List<MapControl> controls = new ArrayList<MapControl>();
+
+	private ArrayList<UIDL> uidl = new ArrayList<UIDL>();
+
+	private SimplePanel wrapperPanel;
+
+	private String apiKey = "";
+
+	private Timer apiLoadWaitTimer = null;
 
 	public enum MapControl {
 		SmallMapControl, HierarchicalMapTypeControl, LargeMapControl, MapTypeControl, MenuMapTypeControl, OverviewMapControl, ScaleControl, SmallZoomControl
@@ -131,13 +144,56 @@ public class VGoogleMap extends Composite implements Paintable,
 			return url;
 		}
 	}
-
+	
 	/**
-	 * The constructor should first call super() to initialize the component and
-	 * then handle any initialization relevant to Vaadin.
+	 * Load the GoogleMaps API asynchronously with the provided key.  
+	 * @param apiKey - the API-key to be used. 
 	 */
-	public VGoogleMap() {
-		initWidget(map); // All Composites need to call initWidget()
+	private static native void loadScript(String apiKey)/*-{
+		
+		var script = $doc.createElement('script');
+      	script.lang = "javascript";
+      
+	    script.src = "http://maps.google.com/maps?gwt=1&file=api&key="+apiKey+"&v=2.x&async=2";
+	    $wnd.document.body.appendChild(script); 
+		 
+	}-*/;
+	
+	/**
+	 * Check for the existence of the GoogleMaps API, if not found
+	 * the API is loaded. 
+	 * @param apiKey - the key to be used if API not loaded
+	 * @return true - if API loaded <br /> false - if no API found
+	 */
+	private static boolean checkForGoogleMapApi(String apiKey){
+		if(com.google.gwt.maps.client.Maps.isLoaded()){
+			synchronized (loadingApi) {
+				if(loadingApi){
+					loadingApi = false; 
+				}
+			}
+			return true;
+		}else{
+			synchronized (loadingApi ) {
+				if(!loadingApi){
+					loadingApi = true; 
+					loadScript(apiKey);
+				}
+			}
+			
+			return false; 
+		}
+	}
+	
+	
+	/**
+	 * Once the API has been loaded, the MapWidget can be initialized. This method
+	 * will initialize the MapWidget and place it inside the wrapper from the composite
+	 * root. 
+	 */
+	private void loadMap(){
+		map = new MapWidget();
+		wrapperPanel.add(map); 
 
 		// This method call of the Paintable interface sets the component
 		// style name in DOM tree
@@ -146,21 +202,80 @@ public class VGoogleMap extends Composite implements Paintable,
 		map.addMapMoveEndHandler(this);
 
 		map.addMapClickHandler(this);
+		
+		//Update all the uidl requests that have been made
+		if(uidl != null && uidl.size() > 0){
+			for(UIDL uidl: this.uidl)
+			updateFromUIDL(uidl, client); 
+		}
+		
+		uidl = null; 
 	}
 
+	/**
+	 * The constructor should first call super() to initialize the component and
+	 * then handle any initialization relevant to Vaadin.
+	 */
+	public VGoogleMap() {
+		wrapperPanel = new SimplePanel();  
+		
+		initWidget(wrapperPanel); // All Composites need to call initWidget()
+	}
+	
 	/**
 	 * Called whenever an update is received from the server
 	 */
 	public void updateFromUIDL(UIDL uidl, ApplicationConnection client) {
-		// This call should be made first.
-		// It handles sizes, captions, tooltips, etc. automatically.
-		if (client.updateComponent(this, uidl, true)) {
-			return;
-		}
-
+		
+		String width = uidl.getStringAttribute("width"); 
+		String height = uidl.getStringAttribute("height"); 
+		
+		wrapperPanel.setSize(width, height); 
+		
 		// Save reference to server connection object to be able to send
 		// user interaction later
 		this.client = client;
+		 
+		
+		if(map == null){
+			
+			apiKey = uidl.getStringAttribute("apikey"); 
+//			ApplicationConnection.getConsole().error("Got API-key: " + apiKey); 
+			
+			
+			if(checkForGoogleMapApi(apiKey)){
+				loadMap(); 
+			}else{
+				if(apiLoadWaitTimer == null){
+					  apiLoadWaitTimer = new Timer() {
+						
+						@Override
+						public void run() {
+							
+							if(checkForGoogleMapApi(apiKey)){
+								loadMap(); 
+								
+							}else{
+								this.schedule(100); 
+							}
+							
+						}
+					};
+					apiLoadWaitTimer.schedule(100);
+				}
+			}	
+			
+			this.uidl.add(uidl); 
+		return ; 
+		}
+		if(apiLoadWaitTimer != null){
+			apiLoadWaitTimer.cancel(); 
+			apiLoadWaitTimer = null;
+		}
+		
+		if (client.updateComponent(this, uidl, true)) {
+			return;
+		}
 
 		// Save the client side identifier (paintable id) for the widget
 		paintableId = uidl.getId();
@@ -498,7 +613,6 @@ public class VGoogleMap extends Composite implements Paintable,
 		eggMarker.setVisible(map.getZoomLevel() >= 13);
 	}
 	
-	@Override
 	public void onDragEnd(MarkerDragEndEvent event) {
 		Marker marker = (Marker) event.getSource();
 		

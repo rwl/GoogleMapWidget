@@ -100,9 +100,7 @@ public class GoogleMap extends AbstractComponent {
 		}
 	};
 
-	
-
-	
+	private String apiKey = "";
 
 	/**
 	 * Construct a new instance of the map with given size.
@@ -134,6 +132,41 @@ public class GoogleMap extends AbstractComponent {
 		this.center = center;
 		this.zoom = zoom;
 	}
+	
+	/**
+	 * Construct a new instance of the map with given size.
+	 * 
+	 * @param application
+	 * @link Application owning this instance.
+	 * @param apiKey - the API key to be used for Google Maps
+	 */
+	public GoogleMap(Application application, String apiKey) {
+		application.addResource(markerResource);
+		this.apiKey  = apiKey; 
+
+		// Greewich Royal Observatory
+		center = new Point2D.Double(-0.001475, 51.477811);
+		zoom = 14;
+	}
+
+	/**
+	 * Construct a new instance of the map with given parameters.
+	 * 
+	 * @param application
+	 * @link Application owning this instance.
+	 * @param center
+	 *            center of the map as a {@link Point2D.Double}
+	 * @param zoom
+	 *            initial zoom level of the map
+	 *            @param apiKey - the API key to be used for Google Maps
+	 */
+	public GoogleMap(Application application, Point2D.Double center, int zoom, String apiKey) {
+		this(application);
+		this.apiKey = apiKey; 
+
+		this.center = center;
+		this.zoom = zoom;
+	}
 
 	@Override
 	public void paintContent(PaintTarget target) throws PaintException {
@@ -142,6 +175,7 @@ public class GoogleMap extends AbstractComponent {
 		target.addVariable(this, "center_lng", center.x);
 		target.addVariable(this, "zoom", zoom);
 		target.addVariable(this, "swze", scrollWheelZoomEnabled);
+		target.addAttribute("apikey", apiKey); 
 
 		for (MapControl control : controls) {
 			target.addAttribute(control.name(), true);

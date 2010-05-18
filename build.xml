@@ -33,7 +33,7 @@
 		<property name="gwt-maps" value="WebContent/WEB-INF/lib/gwt-maps.jar" />
 		
 		<!-- The version of the build -->
-		<property name="version" value="0.9.1" />
+		<property name="version" value="0.9.5" />
 		
 		<!-- The filename of the built packages -->
 		<property name="filename" value="googlemapwidget-${version}"></property>
@@ -88,10 +88,20 @@
 		</path>
 
 	</target>
+	
+	<target name="quick-clean" >
+		<echo>==== CLEANING OLD BUILD ====</echo>
+		<delete failonerror="false">
+		    <fileset dir="WebContent/WEB-INF/classes" includes="**/*"/>
+		  </delete>
+		  
+	</target>
+	
+	<!-- TODO Add clean target that removes the class files !! -->
 		
-	<target name="compile-googlemapwidget" depends="init">	
+	<target name="compile-googlemapwidget" depends="init, quick-clean">
 		<mkdir dir="WebContent/WEB-INF/classes"/>
-		<javac srcdir="${client-side-src-location}" destdir="WebContent/WEB-INF/classes">
+		<javac target="1.5" srcdir="${client-side-src-location}" destdir="WebContent/WEB-INF/classes" >
 			<classpath>
 				<path refid="compile.classpath"/>
 			</classpath>

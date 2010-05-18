@@ -74,7 +74,6 @@ public class GoogleMapWidgetApp extends Application {
 		//Remove a marker from the map
 		 Button removeMarker = new Button("Remove \"Test marker2\"", new Button.ClickListener() {
 
-	            @Override
 	            public void buttonClick(ClickEvent event) {
 //	                googleMap.addMarker(new BasicMarker(4L, new Point2D.Double(22.2, 60.4522),
 //	                "Test marker3"));
@@ -90,7 +89,6 @@ public class GoogleMapWidgetApp extends Application {
 	        //Note, works only if marker has information window content
 	        googleMap.addListener(new GoogleMap.MarkerClickListener() {
 				
-				@Override
 				public void markerClicked(Marker clickedMarker) {
 					System.out.println("Marker:" + clickedMarker.getTitle() +" clicked"); 
 					
@@ -102,7 +100,6 @@ public class GoogleMapWidgetApp extends Application {
 	        //a new location
 	        googleMap.addListener(new GoogleMap.MarkerMovedListener() {
 				
-				@Override
 				public void markerMoved(Marker movedMarker) {
 					System.out.println("Evetn propagated! Marker: " + movedMarker.getTitle() + " moved. New loc: " + movedMarker.getLatLng().toString());
 				}
