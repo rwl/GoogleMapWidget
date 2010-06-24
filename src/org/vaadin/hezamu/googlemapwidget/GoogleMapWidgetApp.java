@@ -32,13 +32,13 @@ public class GoogleMapWidgetApp extends Application {
 
         // Create a marker at the IT Mill offices
         mark1 = new BasicMarker(1L, new Point2D.Double(22.3, 60.4522),
-                "Test marker");
+                "Test marker1");
 
         mark2 = new BasicMarker(2L, new Point2D.Double(22.4, 60.4522),
-                "Test marker2");
+                "Test marker2 (testing encoding: едц)");
 
         mark3 = new BasicMarker(4L, new Point2D.Double(22.6, 60.4522),
-                "Test marker3");
+                "Test marker3 (testing draggable)");
 
         mark4 = new BasicMarker(5L, new Point2D.Double(22.7, 60.4522),
                 "Test marker4");
@@ -57,9 +57,23 @@ public class GoogleMapWidgetApp extends Application {
         googleMap.addMarker(mark3);
         googleMap.addMarker(mark4);
         googleMap.addMarker(mark5);
-        googleMap.addMarker(mark5);
-        getMainWindow().addComponent(googleMap);
+        getMainWindow().getContent().addComponent(googleMap);
+        
+        Button b = new Button("Swap marker 3 'dragability'");
+        b.addListener(new Button.ClickListener() {
 
+			@Override
+			public void buttonClick(ClickEvent event) {
+				mark3.setDraggable(!mark3.isDraggable());
+				mark4.setVisible(false); // this needs a fix at the client side (search for FIXME in client side code)
+				mark4.setTitle("new title"); // this also 
+				googleMap.requestRepaint();
+			}
+        	
+        });
+        
+        getMainWindow().getContent().addComponent(b);
+        
         extendedFeatures();
 
         popupTest();
