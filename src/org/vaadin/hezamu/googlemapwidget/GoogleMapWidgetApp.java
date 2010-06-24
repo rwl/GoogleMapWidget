@@ -1,12 +1,14 @@
 package org.vaadin.hezamu.googlemapwidget;
 
 import java.awt.geom.Point2D;
+import java.util.Random;
 
 import org.vaadin.hezamu.googlemapwidget.overlay.BasicMarker;
 import org.vaadin.hezamu.googlemapwidget.overlay.Marker;
 
 import com.vaadin.Application;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Button.ClickEvent;
@@ -19,6 +21,7 @@ public class GoogleMapWidgetApp extends Application {
     private BasicMarker mark3;
     private BasicMarker mark4;
     private BasicMarker mark5;
+    private int i = 0;
 
     @Override
     public void init() {
@@ -35,17 +38,17 @@ public class GoogleMapWidgetApp extends Application {
                 "Test marker1");
 
         mark2 = new BasicMarker(2L, new Point2D.Double(22.4, 60.4522),
-                "Test marker2 (testing encoding: едц)");
+                "Test marker2 ");
 
         mark3 = new BasicMarker(4L, new Point2D.Double(22.6, 60.4522),
-                "Test marker3 (testing draggable)");
+                "Test marker3 ");
 
         mark4 = new BasicMarker(5L, new Point2D.Double(22.7, 60.4522),
                 "Test marker4");
 
         // Marker with information window pupup
         mark5 = new BasicMarker(6L, new Point2D.Double(22.8, 60.4522),
-                "Test marker5");
+                "Marker5");
         mark5.setInfoWindowContent(googleMap, new Label("Hello"));
 
         Label content = new Label("Hello");
@@ -59,21 +62,75 @@ public class GoogleMapWidgetApp extends Application {
         googleMap.addMarker(mark5);
         getMainWindow().getContent().addComponent(googleMap);
         
-        Button b = new Button("Swap marker 3 'dragability'");
+        final Button b = new Button("Marker 3 is draggable: " + mark3.isDraggable());
         b.addListener(new Button.ClickListener() {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
 				mark3.setDraggable(!mark3.isDraggable());
-				mark4.setVisible(false); // this needs a fix at the client side (search for FIXME in client side code)
-				mark4.setTitle("new title"); // this also 
+				b.setCaption("Marker 3 is draggable: " + mark3.isDraggable());
 				googleMap.requestRepaint();
 			}
         	
         });
         
-        getMainWindow().getContent().addComponent(b);
+        final Button b2 = new Button("Marker 4 is visible: " + mark4.isVisible());
+        b2.addListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				mark4.setVisible(!mark4.isVisible());
+				b2.setCaption("Marker 4 is visible: " +mark4.isVisible());
+				googleMap.requestRepaint();
+			}
+        	
+        });
         
+        final Button b3 = new Button("Randomize Marker 5 location ");
+        b3.addListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				mark5.setTitle(mark5.getTitle() + i);
+				Random r = new Random();
+				
+				int val1 = r.nextInt(10);
+				int val2 = r.nextInt(10);
+				mark5.setLatLng(new Point2D.Double(22.8 + ((double)val1) / 100L, 60.4522  + ((double)val2) / 100L));
+				googleMap.requestRepaint();
+
+			}
+
+        });
+        
+        
+        final Button b4 = new Button("Set this title to marker 5: " + mark5.getTitle() + i);
+        b4.addListener(new Button.ClickListener() {
+
+			@Override
+			public void buttonClick(ClickEvent event) {
+				mark5.setTitle(mark5.getTitle() + i);
+				b4.setCaption("Set this title to marker 5: " + mark5.getTitle() + i);
+				googleMap.requestRepaint();
+
+			}
+
+        });
+        
+
+
+        HorizontalLayout hl = new HorizontalLayout();
+        Label l = new Label("These didn't work before: ");
+        l.setSizeUndefined();
+        hl.setSpacing(true);
+        hl.addComponent(l);
+        hl.addComponent(b);
+        hl.addComponent(b2);
+        hl.addComponent(b3);
+        hl.addComponent(b4);
+
+        getMainWindow().getContent().addComponent(hl);
+
         extendedFeatures();
 
         popupTest();

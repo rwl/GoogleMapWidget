@@ -889,6 +889,8 @@ public class VGoogleMap extends Composite implements Paintable,
                     JSONNumber jsLat, jsLng;
                     JSONBoolean jsVisible, jsHasInfo, jsDraggable;
                     Marker marker = null;
+                    boolean isOldMarker = false;
+                    boolean replaceMarker = false;
                     
                     
                     if ((jsMarker = array.get(i).isObject()) == null) {
@@ -897,19 +899,20 @@ public class VGoogleMap extends Composite implements Paintable,
 
                     // Read marker id
                     if ((value = jsMarker.get("mid")) == null) {
-                        continue;
+                    	continue;
                     }
                     if ((jsMID = value.isString()) == null) {
-                        continue;
+                    	continue;
                     }
 
-                    // FIXME: Other changes has to be checked for too, for instance visible, title, icon, ....
+
                     if ((value = jsMarker.get("draggable")) == null) {
                     	continue;
                     } else {
                     	if (knownMarkers.containsKey(jsMID.toString())) {
                     		marker = knownMarkers.get(jsMID.toString());
                     		marker.setDraggingEnabled((((JSONBoolean)jsMarker.get("draggable")).booleanValue()));
+                    		isOldMarker = true;
                     	}
 
                     }
@@ -919,61 +922,92 @@ public class VGoogleMap extends Composite implements Paintable,
                     
                     // Read marker latitude
                     if ((value = jsMarker.get("lat")) == null) {
-                        continue;
+                        if (!isOldMarker) continue;
                     }
                     if ((jsLat = value.isNumber()) == null) {
-                        continue;
+                        if (!isOldMarker) continue;
                     }
 
                     // Read marker longitude
                     if ((value = jsMarker.get("lng")) == null) {
-                        continue;
+                        if (!isOldMarker) continue;
                     }
                     if ((jsLng = value.isNumber()) == null) {
-                        continue;
+                        if (!isOldMarker) continue;
+                    } else {
+  //                  	marker.setLatLng(jsLng.doubleValue());
                     }
 
                     // Read marker title
                     if ((value = jsMarker.get("title")) == null) {
-                        continue;
+                        if (!isOldMarker) continue;
                     }
                     if ((jsTitle = value.isString()) == null) {
-                        continue;
+                        if (!isOldMarker) continue;
+                    } else {
+                    	if (isOldMarker && marker != null) {
+                    		String title = marker.getTitle();
+                    		
+                    		// if title is changed
+                    		if (!jsTitle.stringValue().equals(title)) {
+                    			replaceMarker = true;                    			
+                    		}
+                    	}
                     }
 
                     // Read marker visibility
                     if ((value = jsMarker.get("visible")) == null) {
-                        continue;
+                        if (!isOldMarker) continue;
                     }
                     if ((jsVisible = value.isBoolean()) == null) {
-                        continue;
+                        if (!isOldMarker) continue;
+                    } else {
+                    	if (marker != null) marker.setVisible(jsVisible.booleanValue());
                     }
 
-                    // Read marker icon
-                    if ((value = jsMarker.get("icon")) == null) {
-                        jsIcon = null;
-                    } else if ((jsIcon = value.isString()) == null) {
-                        continue;
-                    }
 
                     // Read marker draggability (is that a word? :)
                     if ((value = jsMarker.get("draggable")) == null) {
-                        continue;
+                        if (!isOldMarker) continue;
                     }
                     
                     if ((jsDraggable = value.isBoolean()) == null) {
-                        continue;
+                        if (!isOldMarker) continue;
+                    }
+
+                    // Change posision, if changed
+                    if (marker != null && jsLat != null && jsLng != null && marker.getLatLng() != null) {
+                    	LatLng llang = marker.getLatLng();
+                    	
+                    	LatLng llang2 = LatLng.newInstance(jsLat.doubleValue(), jsLng.doubleValue());
+                    	if (!llang.isEquals(llang2)) {
+                    		marker.setLatLng(llang2);
+                    	}
+                    	
+                    	
                     }
                     
-                    // Skip re-creation if known markers
-                    if (knownMarkers.containsKey(jsMID.toString())) {
-                        continue;
+                    // Read marker icon
+                    if ((value = jsMarker.get("icon")) == null) {
+                    	jsIcon = null;
+                    } else if ((jsIcon = value.isString()) == null) {
+                        if (!isOldMarker) continue;
+                    }
+                    
+                    // do not create new one if old found (only if we want to replace it)
+                    if (isOldMarker && !replaceMarker) continue;
+                    
+                    if (!isOldMarker) replaceMarker = false; // Never replace a marker if there is no previous one
+                    
+                    if (replaceMarker) {
+                    	map.removeOverlay(marker);
+                    	markersFromThisUpdate.remove(marker);
                     }
 
 
                     marker = createMarker(jsLat, jsLng, jsTitle,
                             jsVisible, jsIcon, jsDraggable);
-
+                    
                     if (marker != null) {
                         map.addOverlay(marker);
 

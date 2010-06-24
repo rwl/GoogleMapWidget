@@ -1,6 +1,9 @@
 --- v. 0.9.6 --- Johan Ånäs
 + Fixed encoding problems for markers
 + Fixed dragging problems for an existing marker
++ Fixed setVisible for existing markers
++ Fixed location changing for existing markers (from server side)
++ Fixed title changing
 
 --- v. 0.9.1 --- Petri Heinonen 
 + Added methods for removing a single marker and all markers

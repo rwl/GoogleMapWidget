@@ -21,19 +21,20 @@
 		 /gwt/gwt-user.jar 
 		 /gwt/gwt-dev.jar 
 		--> 
-		<property name="extras-location" value="/Users/petri/Documents" />
+
+		<property name="extras-location" value="C:\\" />
 		
 		<!-- where platform specific GWT distribution is located -->
 		<property name="gwt-location" value="${extras-location}/gwt" />
 		
 		<!-- where Toolkit jar is located -->
-		<property name="toolkit-jar-location" value="WebContent/WEB-INF/lib/vaadin-6.3.0.jar" />
+		<property name="toolkit-jar-location" value="WebContent/WEB-INF/lib/vaadin-6.3.4.jar" />
 		
 		<!-- The gwt-maps jar -->
 		<property name="gwt-maps" value="WebContent/WEB-INF/lib/gwt-maps.jar" />
 		
 		<!-- The version of the build -->
-		<property name="version" value="0.9.5" />
+		<property name="version" value="0.9.6" />
 		
 		<!-- The filename of the built packages -->
 		<property name="filename" value="googlemapwidget-${version}"></property>
