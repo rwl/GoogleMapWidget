@@ -51,7 +51,11 @@ public class BasicMarkerSource implements MarkerSource, Serializable {
 			}
 		}
 
-		return ("[" + markerJSON + "]").getBytes();
+		try {
+			return ("[" + markerJSON + "]").getBytes("UTF-8");
+		} catch (Exception e) {
+			return  ("[" + markerJSON + "]").getBytes();
+		}
 	}
 
 	public void registerEvents(GoogleMap map) {

@@ -888,7 +888,9 @@ public class VGoogleMap extends Composite implements Paintable,
                     JSONString jsMID, jsTitle, jsIcon;
                     JSONNumber jsLat, jsLng;
                     JSONBoolean jsVisible, jsHasInfo, jsDraggable;
-
+                    Marker marker = null;
+                    
+                    
                     if ((jsMarker = array.get(i).isObject()) == null) {
                         continue;
                     }
@@ -901,14 +903,20 @@ public class VGoogleMap extends Composite implements Paintable,
                         continue;
                     }
 
+                    // FIXME: Other changes has to be checked for too, for instance visible, title, icon, ....
+                    if ((value = jsMarker.get("draggable")) == null) {
+                    	continue;
+                    } else {
+                    	if (knownMarkers.containsKey(jsMID.toString())) {
+                    		marker = knownMarkers.get(jsMID.toString());
+                    		marker.setDraggingEnabled((((JSONBoolean)jsMarker.get("draggable")).booleanValue()));
+                    	}
+
+                    }
                     // Add maker to list of markers in this update
                     markersFromThisUpdate.add(jsMID.toString());
-
-                    // Skip known markers
-                    if (knownMarkers.containsKey(jsMID.toString())) {
-                        continue;
-                    }
-
+                    
+                    
                     // Read marker latitude
                     if ((value = jsMarker.get("lat")) == null) {
                         continue;
@@ -952,11 +960,18 @@ public class VGoogleMap extends Composite implements Paintable,
                     if ((value = jsMarker.get("draggable")) == null) {
                         continue;
                     }
+                    
                     if ((jsDraggable = value.isBoolean()) == null) {
                         continue;
                     }
+                    
+                    // Skip re-creation if known markers
+                    if (knownMarkers.containsKey(jsMID.toString())) {
+                        continue;
+                    }
 
-                    Marker marker = createMarker(jsLat, jsLng, jsTitle,
+
+                    marker = createMarker(jsLat, jsLng, jsTitle,
                             jsVisible, jsIcon, jsDraggable);
 
                     if (marker != null) {
