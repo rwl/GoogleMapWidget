@@ -1,0 +1,2 @@
+# Module org.vaadin.hezamu.googlemapwidget.widgetset.GooglemapwidgetWidgetset
+# RPC service class, partial path of RPC policy file
