@@ -24,8 +24,9 @@
 
 		<property name="extras-location" value="C:\\" />
 		
-		<!-- where platform specific GWT distribution is located -->
-		<property name="gwt-location" value="${extras-location}/gwt" />
+		<property name="vaadin-download-location" value="/Applications/eclipse-jee-helios-macosx-cocoa-x86_64/configuration/com.vaadin.integration.eclipse/download" />
+		<property name="gwt-user-jar" value="${vaadin-download-location}/gwt-user/2.0.3/gwt-user.jar" />
+		<property name="gwt-dev-jar" value="${vaadin-download-location}/gwt-dev/2.0.3/gwt-dev.jar" />
 		
 		<!-- where Toolkit jar is located -->
 		<property name="toolkit-jar-location" value="WebContent/WEB-INF/lib/vaadin-6.3.4.jar" />
@@ -34,7 +35,7 @@
 		<property name="gwt-maps" value="WebContent/WEB-INF/lib/gwt-maps.jar" />
 		
 		<!-- The version of the build -->
-		<property name="version" value="0.9.6" />
+		<property name="version" value="0.9.7" />
 		
 		<!-- The filename of the built packages -->
 		<property name="filename" value="googlemapwidget-${version}"></property>
@@ -83,8 +84,8 @@
 			<pathelement path="${client-side-src-location}" />
 			<pathelement path="${gwt-maps}" />
 			<pathelement path="${toolkit-jar-location}" />
-			<pathelement path="${gwt-location}/gwt-user.jar" />
-			<pathelement path="${gwt-location}/gwt-dev.jar" />
+			<pathelement path="${gwt-user-jar}" />
+			<pathelement path="${gwt-dev-jar}" />
 			
 		</path>
 
@@ -140,7 +141,7 @@
 		<!--<copy todir="${build-path}/temp" file="${manual-filename}" /> -->
 		 
 		<!-- Copy license files -->
-		<copy todir="${build-path}/temp" file="${license-apache2}" />
+		<copy todir="${build-path}/temp" file="apache-license-2.0.txt" />
 		<!-- <copy todir="${build-path}/temp" file="${license-general}" />
 		<copy todir="${build-path}/temp" file="${license-agpl}" />
 		<copy todir="${build-path}/temp" file="${license-cval}" /> -->
