@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.vaadin.hezamu.googlemapwidget.overlay.BasicMarker;
 import org.vaadin.hezamu.googlemapwidget.overlay.BasicMarkerSource;
 import org.vaadin.hezamu.googlemapwidget.overlay.InfoWindowTab;
 import org.vaadin.hezamu.googlemapwidget.overlay.Marker;
@@ -43,13 +42,13 @@ public class GoogleMap extends AbstractComponent {
 
 	private int zoom;
 
-	private List<MapMoveListener> moveListeners = new ArrayList<MapMoveListener>();
+	private final List<MapMoveListener> moveListeners = new ArrayList<MapMoveListener>();
 
-	private List<MapClickListener> mapClickListeners = new ArrayList<MapClickListener>();
-	
-	private List<MarkerClickListener> markerListeners = new ArrayList<MarkerClickListener>();
-	
-	private List<MarkerMovedListener> markerMovedListeners = new ArrayList<MarkerMovedListener>();
+	private final List<MapClickListener> mapClickListeners = new ArrayList<MapClickListener>();
+
+	private final List<MarkerClickListener> markerListeners = new ArrayList<MarkerClickListener>();
+
+	private final List<MarkerMovedListener> markerMovedListeners = new ArrayList<MarkerMovedListener>();
 
 	private MarkerSource markerSource = null;
 
@@ -57,7 +56,7 @@ public class GoogleMap extends AbstractComponent {
 
 	private boolean closeInfoWindow = false;
 
-	private Map<Long, PolyOverlay> overlays = new HashMap<Long, PolyOverlay>();
+	private final Map<Long, PolyOverlay> overlays = new HashMap<Long, PolyOverlay>();
 
 	private boolean overlaysChanged = false;
 
@@ -65,13 +64,13 @@ public class GoogleMap extends AbstractComponent {
 
 	private boolean clearMapTypes = false;
 
-	private List<MapControl> controls = new ArrayList<MapControl>();
+	private final List<MapControl> controls = new ArrayList<MapControl>();
 
-	private List<CustomMapType> mapTypes = new ArrayList<CustomMapType>();
+	private final List<CustomMapType> mapTypes = new ArrayList<CustomMapType>();
 
 	private boolean mapTypesChanged = false;
 
-	private ApplicationResource markerResource = new ApplicationResource() {
+	private final ApplicationResource markerResource = new ApplicationResource() {
 		private static final long serialVersionUID = -6926454922185543547L;
 
 		public Application getApplication() {
@@ -91,8 +90,8 @@ public class GoogleMap extends AbstractComponent {
 		}
 
 		public DownloadStream getStream() {
-			return new DownloadStream(new ByteArrayInputStream(markerSource
-					.getMarkerJSON()), getMIMEType(), getFilename());
+			return new DownloadStream(new ByteArrayInputStream(
+					markerSource.getMarkerJSON()), getMIMEType(), getFilename());
 		}
 
 		public String getMIMEType() {
@@ -101,6 +100,8 @@ public class GoogleMap extends AbstractComponent {
 	};
 
 	private String apiKey = "";
+
+	private int clientLogLevel = 0;
 
 	/**
 	 * Construct a new instance of the map with given size.
@@ -132,17 +133,18 @@ public class GoogleMap extends AbstractComponent {
 		this.center = center;
 		this.zoom = zoom;
 	}
-	
+
 	/**
 	 * Construct a new instance of the map with given size.
 	 * 
 	 * @param application
 	 * @link Application owning this instance.
-	 * @param apiKey - the API key to be used for Google Maps
+	 * @param apiKey
+	 *            - the API key to be used for Google Maps
 	 */
 	public GoogleMap(Application application, String apiKey) {
 		application.addResource(markerResource);
-		this.apiKey  = apiKey; 
+		this.apiKey = apiKey;
 
 		// Greewich Royal Observatory
 		center = new Point2D.Double(-0.001475, 51.477811);
@@ -158,11 +160,13 @@ public class GoogleMap extends AbstractComponent {
 	 *            center of the map as a {@link Point2D.Double}
 	 * @param zoom
 	 *            initial zoom level of the map
-	 *            @param apiKey - the API key to be used for Google Maps
+	 * @param apiKey
+	 *            - the API key to be used for Google Maps
 	 */
-	public GoogleMap(Application application, Point2D.Double center, int zoom, String apiKey) {
+	public GoogleMap(Application application, Point2D.Double center, int zoom,
+			String apiKey) {
 		this(application);
-		this.apiKey = apiKey; 
+		this.apiKey = apiKey;
 
 		this.center = center;
 		this.zoom = zoom;
@@ -175,7 +179,8 @@ public class GoogleMap extends AbstractComponent {
 		target.addVariable(this, "center_lng", center.x);
 		target.addVariable(this, "zoom", zoom);
 		target.addVariable(this, "swze", scrollWheelZoomEnabled);
-		target.addAttribute("apikey", apiKey); 
+		target.addAttribute("apikey", apiKey);
+		target.addAttribute("loglevel", clientLogLevel);
 
 		for (MapControl control : controls) {
 			target.addAttribute(control.name(), true);
@@ -234,9 +239,7 @@ public class GoogleMap extends AbstractComponent {
 				if (poly instanceof Polygon) {
 					Polygon polygon = (Polygon) poly;
 					target.addAttribute("fillcolor", polygon.getFillColor());
-					target
-							.addAttribute("fillopacity", polygon
-									.getFillOpacity());
+					target.addAttribute("fillopacity", polygon.getFillOpacity());
 				}
 				target.endTag("o");
 			}
@@ -311,30 +314,31 @@ public class GoogleMap extends AbstractComponent {
 		if (variables.containsKey("marker")) {
 			clickedMarker = markerSource.getMarker(variables.get("marker")
 					.toString());
-			if (clickedMarker != null){
-				fireMarkerClickedEvent(clickedMarker); 
-				if(clickedMarker.getInfoWindowContent() != null) {
+			if (clickedMarker != null) {
+				fireMarkerClickedEvent(clickedMarker);
+				if (clickedMarker.getInfoWindowContent() != null) {
 					requestRepaint();
 				}
-
 			}
 		}
-		
-		if(variables.containsKey("markerMovedId")){
-		
-			String markerID = variables.get("markerMovedId").toString().replaceAll("\"",""); 
-			List<Marker> markers = markerSource.getMarkers(); 
-			
-			for(Marker mark: markers){
-				if(mark.getId() == Long.parseLong(markerID)){
-										
-					double lat = new Double(variables.get("markerMovedLat").toString());
-					double lng = new Double(variables.get("markerMovedLong").toString());
+
+		if (variables.containsKey("markerMovedId")) {
+			String markerID = variables.get("markerMovedId").toString()
+					.replaceAll("\"", "");
+			List<Marker> markers = markerSource.getMarkers();
+
+			for (Marker mark : markers) {
+				if (mark.getId() == Long.parseLong(markerID)) {
+
+					double lat = new Double(variables.get("markerMovedLat")
+							.toString());
+					double lng = new Double(variables.get("markerMovedLong")
+							.toString());
 					mark.getLatLng().setLocation(lng, lat);
-					
-					fireMarkerMovedEvent(mark); 
+
+					fireMarkerMovedEvent(mark);
 					break;
-				} 
+				}
 			}
 		}
 	}
@@ -351,21 +355,19 @@ public class GoogleMap extends AbstractComponent {
 			listener.mapClicked(clickPos);
 		}
 	}
-	
-	private void fireMarkerClickedEvent(Marker clickedMarker){
-		for(MarkerClickListener m: markerListeners){
-			m.markerClicked(clickedMarker); 
-			
+
+	private void fireMarkerClickedEvent(Marker clickedMarker) {
+		for (MarkerClickListener m : markerListeners) {
+			m.markerClicked(clickedMarker);
 		}
 	}
 
-	private void fireMarkerMovedEvent(Marker movedMarker){
-		for(MarkerMovedListener m: markerMovedListeners){
-			m.markerMoved(movedMarker); 
-			
+	private void fireMarkerMovedEvent(Marker movedMarker) {
+		for (MarkerMovedListener m : markerMovedListeners) {
+			m.markerMoved(movedMarker);
 		}
 	}
-	
+
 	/**
 	 * Interface for listening map move and zoom events.
 	 * 
@@ -403,10 +405,10 @@ public class GoogleMap extends AbstractComponent {
 		 */
 		public void mapClicked(Point2D.Double clickPos);
 	}
-	
+
 	/**
 	 * Interface for listening marker click events.
-	 *
+	 * 
 	 */
 	public interface MarkerClickListener {
 		/**
@@ -418,7 +420,7 @@ public class GoogleMap extends AbstractComponent {
 		 */
 		public void markerClicked(Marker clickedMarker);
 	}
-	
+
 	/**
 	 * Interface for listening marker move events.
 	 * 
@@ -433,7 +435,6 @@ public class GoogleMap extends AbstractComponent {
 		 */
 		public void markerMoved(Marker movedMarker);
 	}
-
 
 	/**
 	 * Register a new {@link MapClickListener}.
@@ -470,14 +471,14 @@ public class GoogleMap extends AbstractComponent {
 			moveListeners.add(listener);
 		}
 	}
-	
+
 	/**
 	 * Register a new {@link MarkerMovedListener}.
 	 * 
-	 * NOTE!! The marker that is clicked MUST have some information 
-	 * window content! This is due to the implementation of the 
-	 * Widget, as the marker click events do not propagate if 
-	 * there is not a information window opened.
+	 * NOTE!! The marker that is clicked MUST have some information window
+	 * content! This is due to the implementation of the Widget, as the marker
+	 * click events do not propagate if there is not a information window
+	 * opened.
 	 * 
 	 * @param listener
 	 *            new {@link MarkerClickListener} to register
@@ -487,7 +488,7 @@ public class GoogleMap extends AbstractComponent {
 			markerListeners.add(listener);
 		}
 	}
-	
+
 	/**
 	 * Register a new {@link MarkerMovedListener}.
 	 * 
@@ -513,7 +514,7 @@ public class GoogleMap extends AbstractComponent {
 			moveListeners.remove(listener);
 		}
 	}
-	
+
 	/**
 	 * Deregister a {@link MarkerClickListener}.
 	 * 
@@ -525,9 +526,9 @@ public class GoogleMap extends AbstractComponent {
 			markerListeners.remove(listener);
 		}
 	}
-	
+
 	/**
-	 * Deregister a  {@link MarkerMovedListener}.
+	 * Deregister a {@link MarkerMovedListener}.
 	 * 
 	 * @param listener
 	 *            the {@link MarkerMovedListener} to deregister
@@ -576,6 +577,17 @@ public class GoogleMap extends AbstractComponent {
 	 */
 	public void setZoom(int zoom) {
 		this.zoom = zoom;
+		requestRepaint();
+	}
+
+	/**
+	 * Set the level of verbosity the client side uses for tracing or displaying
+	 * error messages.
+	 * 
+	 * @param level
+	 */
+	public void setClientLogLevel(int level) {
+		this.clientLogLevel = level;
 		requestRepaint();
 	}
 
@@ -705,29 +717,29 @@ public class GoogleMap extends AbstractComponent {
 		}
 
 		markerSource.addMarker(marker);
-		requestRepaint(); 
+		requestRepaint();
 	}
-	
-	 /**
-     * Removes the marker from the map
-     * 
-     * @param marker
-     */
-    public void removeMarker(Marker marker) {
 
-        if (markerSource != null) {
-            markerSource.getMarkers().remove(marker);
-            requestRepaint();
-        }
-    }
+	/**
+	 * Removes the marker from the map
+	 * 
+	 * @param marker
+	 */
+	public void removeMarker(Marker marker) {
 
-    public void removeAllMarkers() {
+		if (markerSource != null) {
+			markerSource.getMarkers().remove(marker);
+			requestRepaint();
+		}
+	}
 
-        if (markerSource != null) {
-            markerSource.getMarkers().clear(); 
-            requestRepaint();
-        }
-    }
+	public void removeAllMarkers() {
+
+		if (markerSource != null) {
+			markerSource.getMarkers().clear();
+			requestRepaint();
+		}
+	}
 
 	public void setScrollWheelZoomEnabled(boolean isEnabled) {
 		scrollWheelZoomEnabled = isEnabled;
@@ -765,6 +777,7 @@ public class GoogleMap extends AbstractComponent {
 				tileUrl, isPng, opacity));
 
 		mapTypesChanged = true;
+
 		requestRepaint();
 	}
 
@@ -775,13 +788,13 @@ public class GoogleMap extends AbstractComponent {
 	}
 
 	class CustomMapType {
-		private double opacity;
-		private String tileUrl;
-		private boolean isPng;
-		private int minZoom;
-		private int maxZoom;
-		private String copyright;
-		private String name;
+		private final double opacity;
+		private final String tileUrl;
+		private final boolean isPng;
+		private final int minZoom;
+		private final int maxZoom;
+		private final String copyright;
+		private final String name;
 
 		public CustomMapType(String name, int minZoom, int maxZoom,
 				String copyright, String tileUrl, boolean isPng, double opacity) {

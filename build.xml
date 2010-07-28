@@ -35,7 +35,7 @@
 		<property name="gwt-maps" value="WebContent/WEB-INF/lib/gwt-maps.jar" />
 		
 		<!-- The version of the build -->
-		<property name="version" value="0.9.8" />
+		<property name="version" value="0.9.9" />
 		
 		<!-- The filename of the built packages -->
 		<property name="filename" value="googlemapwidget-${version}"></property>
@@ -63,44 +63,25 @@
 		<!-- <property name="license-agpl" value="doc/license-agpl-3.0.txt" />
 		<property name="license-cval" value="doc/license-cval-1.0.txt" />
 		<property name="license-general" value="doc/licensing.txt" /> -->
-		
 	</target>
 
-	
 	<target name="init" depends="configure">
-
-		<echo>Configured for ${gwt-platform} platform.</echo>
-		<echo>Requirements for classpath:</echo>
-		<echo>  ${gwt-location}/gwt-dev.jar</echo>
-		<echo>  ${gwt-location}/gwt-user.jar</echo>
-		<echo>  ${toolkit-jar-location}</echo>
-		<echo>  ${gwt-maps}</echo>
-		<echo>  ${client-side-src-location}</echo>
-		<echo>Output will be written into ${client-side-destination}</echo>
-		<echo>Note, if you have created your own widgetset, please modify target compile-my-widgetset first.</echo>
-
 		<!-- Construct classpath -->
 		<path id="compile.classpath">
 			<pathelement path="${client-side-src-location}" />
 			<pathelement path="${gwt-maps}" />
 			<pathelement path="${toolkit-jar-location}" />
 			<pathelement path="${gwt-user-jar}" />
-			<pathelement path="${gwt-dev-jar}" />
-			
+			<pathelement path="${gwt-dev-jar}" />			
 		</path>
-
 	</target>
 	
 	<target name="quick-clean" >
-		<echo>==== CLEANING OLD BUILD ====</echo>
 		<delete failonerror="false">
 		    <fileset dir="WebContent/WEB-INF/classes" includes="**/*"/>
-		  </delete>
-		  
+		</delete>		  
 	</target>
 	
-	<!-- TODO Add clean target that removes the class files !! -->
-		
 	<target name="compile-googlemapwidget" depends="init, quick-clean">
 		<mkdir dir="WebContent/WEB-INF/classes"/>
 		<javac target="1.5" srcdir="${client-side-src-location}" destdir="WebContent/WEB-INF/classes" >
@@ -119,11 +100,11 @@
 				
 		<jar jarfile="${build-path}/${filename}.jar" basedir="${build-path}/temp">
 			<manifest>
-						<attribute name="Vaadin-Package-Version" value="1" />
-						<attribute name="Vaadin-Widgetsets" value="org.vaadin.hezamu.googlemapwidget.widgetset.GooglemapwidgetWidgetset" />
-						<attribute name="Implementation-Title" value="GoogleMapWidget" />
-						<attribute name="Implementation-Version" value="${version}" />
-						<attribute name="Implementation-Vendor" value="Henri Muurimaa" />					
+				<attribute name="Vaadin-Package-Version" value="1" />
+				<attribute name="Vaadin-Widgetsets" value="org.vaadin.hezamu.googlemapwidget.widgetset.GooglemapwidgetWidgetset" />
+				<attribute name="Implementation-Title" value="GoogleMapWidget" />
+				<attribute name="Implementation-Version" value="${version}" />
+				<attribute name="Implementation-Vendor" value="Henri Muurimaa" />					
 			</manifest>
 		</jar>
 				
@@ -148,7 +129,6 @@
 		
 		<!-- Cpoy readme -->
 		<copy todir="${build-path}/temp" file="./README.txt" />
-		
 		
 		<!-- Make the zip manifest -->
 		<mkdir dir="${build-path}/temp/META-INF"/>

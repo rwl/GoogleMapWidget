@@ -193,11 +193,7 @@ public class GoogleMapWidgetApp extends Application {
 					private static final long serialVersionUID = -8593284561770538538L;
 
 					public void buttonClick(ClickEvent event) {
-						// googleMap.addMarker(new BasicMarker(4L, new
-						// Point2D.Double(22.2, 60.4522),
-						// "Test marker3"));
 						googleMap.removeMarker(mark2);
-						// googleMap.removeAllMarkers();
 					}
 				});
 
@@ -209,24 +205,37 @@ public class GoogleMapWidgetApp extends Application {
 					private static final long serialVersionUID = 6973907146984242699L;
 
 					public void buttonClick(ClickEvent event) {
-						// googleMap.addMarker(new BasicMarker(4L, new
-						// Point2D.Double(22.2, 60.4522),
-						// "Test marker3"));
 						googleMap.addMarker(mark2);
-						// googleMap.removeAllMarkers();
 					}
 				});
 
 		getMainWindow().addComponent(addMarker);
 
+		// Remove a marker from the map
+		Button clientLogging = new Button("Enable client logging",
+				new Button.ClickListener() {
+					private static final long serialVersionUID = -9221899142449844922L;
+
+					public void buttonClick(ClickEvent event) {
+						Button b = event.getButton();
+						if (b.getCaption().startsWith("Enable")) {
+							googleMap.setClientLogLevel(1);
+							b.setCaption("Disable client logging");
+						} else {
+							googleMap.setClientLogLevel(0);
+							b.setCaption("Enable client logging");
+						}
+					}
+				});
+
+		getMainWindow().addComponent(clientLogging);
+
 		// Add a Marker click listener to catch marker click events.
 		// Note, works only if marker has information window content
 		googleMap.addListener(new GoogleMap.MarkerClickListener() {
-
 			public void markerClicked(Marker clickedMarker) {
 				System.out.println("Marker:" + clickedMarker.getTitle()
 						+ " clicked");
-
 			}
 		});
 

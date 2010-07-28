@@ -99,6 +99,8 @@ public class VGoogleMap extends Composite implements Paintable,
 
 	private String apiKey = "";
 
+	private int logLevel = 0;
+
 	private Timer apiLoadWaitTimer = null;
 
 	public enum MapControl {
@@ -226,6 +228,7 @@ public class VGoogleMap extends Composite implements Paintable,
 
 		String width = uidl.getStringAttribute("width");
 		String height = uidl.getStringAttribute("height");
+		logLevel = uidl.getIntAttribute("loglevel");
 
 		if (height != null) {
 			wrapperPanel.setHeight(height);
@@ -240,7 +243,6 @@ public class VGoogleMap extends Composite implements Paintable,
 		this.client = client;
 
 		if (map == null) {
-
 			apiKey = uidl.getStringAttribute("apikey");
 
 			if (checkForGoogleMapApi(apiKey)) {
@@ -351,7 +353,7 @@ public class VGoogleMap extends Composite implements Paintable,
 				}
 
 				if (u.getChildCount() == 0) {
-					log("No contents for info window");
+					log(1, "No contents for info window");
 				} else if (u.getChildCount() == 1) {
 					// Only one component in the info window -> no tabbing
 					UIDL paintableUIDL = u.getChildUIDL(0).getChildUIDL(0);
@@ -434,8 +436,10 @@ public class VGoogleMap extends Composite implements Paintable,
 					}
 				}
 
-				log("Polygon overlays processed in "
-						+ (System.currentTimeMillis() - nodeStart) + "ms");
+				log(1,
+						"Polygon overlays processed in "
+								+ (System.currentTimeMillis() - nodeStart)
+								+ "ms");
 			} else if (u.getTag().equals("mapTypes")) {
 				long nodeStart = System.currentTimeMillis();
 
@@ -444,7 +448,7 @@ public class VGoogleMap extends Composite implements Paintable,
 					map.addMapType(mapTypeFromUIDL((UIDL) iter.next()));
 				}
 
-				log("Map types processed in "
+				log(1, "Map types processed in "
 						+ (System.currentTimeMillis() - nodeStart) + "ms");
 			}
 		}
@@ -455,8 +459,9 @@ public class VGoogleMap extends Composite implements Paintable,
 
 		ignoreVariableChanges = false;
 
-		log("IGoogleMap.updateFromUIDL() took "
-				+ (System.currentTimeMillis() - start) + "ms");
+		log(1,
+				"IGoogleMap.updateFromUIDL() took "
+						+ (System.currentTimeMillis() - start) + "ms");
 	}
 
 	private MapType mapTypeFromUIDL(UIDL maptypeUIDL) {
@@ -505,7 +510,7 @@ public class VGoogleMap extends Composite implements Paintable,
 			return new SmallZoomControl();
 		}
 
-		log("Unknown control: " + control);
+		log(1, "Unknown control: " + control);
 
 		return null;
 	}
@@ -575,12 +580,12 @@ public class VGoogleMap extends Composite implements Paintable,
 		final double lng = jsLng.doubleValue();
 
 		if (lat < -90 || lat > 90) {
-			log("Invalid latitude for marker: " + lat);
+			log(1, "Invalid latitude for marker: " + lat);
 			return null;
 		}
 
 		if (lng < -180 || lng > 180) {
-			log("Invalid latitude for marker: " + lat);
+			log(1, "Invalid latitude for marker: " + lat);
 			return null;
 		}
 
@@ -638,12 +643,14 @@ public class VGoogleMap extends Composite implements Paintable,
 		client.updateVariable(paintableId, "marker", mId, true);
 	}
 
-	private void log(String message) {
-		// Show message in GWT console
-		System.out.println(message);
+	private void log(int level, String message) {
+		if (level <= logLevel) {
+			// Show message in GWT console
+			System.out.println(message);
 
-		// And also in Vaadin debug window
-		ApplicationConnection.getConsole().log(message);
+			// And also in Vaadin debug window
+			ApplicationConnection.getConsole().log(message);
+		}
 	}
 
 	class InfoWindowOpener implements MarkerClickHandler {
@@ -679,10 +686,13 @@ public class VGoogleMap extends Composite implements Paintable,
 				builder.sendRequest(null, new RequestCallback() {
 					public void onError(Request request, Throwable e) {
 						if (e instanceof RequestTimeoutException) {
-							log("Timeout fetching marker data: "
-									+ e.getMessage());
+							log(1,
+									"Timeout fetching marker data: "
+											+ e.getMessage());
 						} else {
-							log("Error fetching marker data: " + e.getMessage());
+							log(1,
+									"Error fetching marker data: "
+											+ e.getMessage());
 						}
 					}
 
@@ -701,9 +711,10 @@ public class VGoogleMap extends Composite implements Paintable,
 							long start = System.currentTimeMillis();
 							JSONValue json = JSONParser.parse(markerJSON);
 							array = json.isArray();
-							log("JSON parsed in "
-									+ (System.currentTimeMillis() - start)
-									+ "ms");
+							log(1,
+									"JSON parsed in "
+											+ (System.currentTimeMillis() - start)
+											+ "ms");
 							if (array == null) {
 								System.out
 										.println("Marker JSON was not an array.");
@@ -712,12 +723,12 @@ public class VGoogleMap extends Composite implements Paintable,
 
 							handleMarkerJSON(array);
 						} catch (Exception e) {
-							log("Error parsing json: " + e.getMessage());
+							log(1, "Error parsing json: " + e.getMessage());
 						}
 					}
 				});
 			} catch (RequestException e) {
-				log("Failed to send the request: " + e.getMessage());
+				log(1, "Failed to send the request: " + e.getMessage());
 			}
 		}
 
@@ -892,10 +903,10 @@ public class VGoogleMap extends Composite implements Paintable,
 				long dur = System.currentTimeMillis() - startTime;
 
 				if (newMarkers == 0) {
-					log("No new markers added in " + dur + "ms.");
+					log(1, "No new markers added in " + dur + "ms.");
 				} else {
-					log("" + newMarkers + " markers added in " + dur + "ms: "
-							+ dur / newMarkers + "ms per marker");
+					log(1, "" + newMarkers + " markers added in " + dur
+							+ "ms: " + dur / newMarkers + "ms per marker");
 				}
 
 				// Remove markers that wasn't in the update (i.e. removed on
