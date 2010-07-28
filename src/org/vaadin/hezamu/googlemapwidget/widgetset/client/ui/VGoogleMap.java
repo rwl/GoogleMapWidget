@@ -43,7 +43,6 @@ import com.google.gwt.maps.client.geom.LatLng;
 import com.google.gwt.maps.client.geom.LatLngBounds;
 import com.google.gwt.maps.client.geom.MercatorProjection;
 import com.google.gwt.maps.client.geom.Point;
-import com.google.gwt.maps.client.geom.Size;
 import com.google.gwt.maps.client.overlay.Icon;
 import com.google.gwt.maps.client.overlay.Marker;
 import com.google.gwt.maps.client.overlay.MarkerOptions;
@@ -91,10 +90,6 @@ public class VGoogleMap extends Composite implements Paintable,
 	private boolean ignoreVariableChanges = true;
 
 	private long markerRequestSentAt;
-
-	private boolean eggActive = false;
-
-	private Marker eggMarker;
 
 	private final List<MapControl> controls = new ArrayList<MapControl>();
 
@@ -150,15 +145,13 @@ public class VGoogleMap extends Composite implements Paintable,
 	 * @param apiKey
 	 *            - the API-key to be used.
 	 */
-	private static native void loadScript(String apiKey)/*-{
-														
-														var script = $doc.createElement('script');
-														script.lang = "javascript";
-														
-														script.src = "http://maps.google.com/maps?gwt=1&file=api&key="+apiKey+"&v=2.x&async=2";
-														$wnd.document.body.appendChild(script); 
-														
-														}-*/;
+	private static native void loadScript(String apiKey)
+	/*-{
+		var script = $doc.createElement('script');
+		script.lang = "javascript";
+		script.src = "http://maps.google.com/maps?gwt=1&file=api&key="+apiKey+"&v=2.x&async=2";
+		$wnd.document.body.appendChild(script);	
+	}-*/;
 
 	/**
 	 * Check for the existence of the GoogleMaps API, if not found the API is
@@ -242,8 +235,6 @@ public class VGoogleMap extends Composite implements Paintable,
 			wrapperPanel.setWidth(width);
 		}
 
-		// wrapperPanel.setSize(width, height);
-
 		// Save reference to server connection object to be able to send
 		// user interaction later
 		this.client = client;
@@ -251,8 +242,6 @@ public class VGoogleMap extends Composite implements Paintable,
 		if (map == null) {
 
 			apiKey = uidl.getStringAttribute("apikey");
-			// ApplicationConnection.getConsole().error("Got API-key: " +
-			// apiKey);
 
 			if (checkForGoogleMapApi(apiKey)) {
 				loadMap();
@@ -301,10 +290,6 @@ public class VGoogleMap extends Composite implements Paintable,
 		if (uidl.hasAttribute("cached") && uidl.getBooleanAttribute("cached")) {
 			return;
 		}
-
-		addEasterEggIcon();
-
-		eggMarker.setVisible(map.getZoomLevel() >= 13);
 
 		long start = System.currentTimeMillis();
 
@@ -627,8 +612,6 @@ public class VGoogleMap extends Composite implements Paintable,
 				.getSouthWest().toString(), false);
 		client.updateVariable(paintableId, "center",
 				map.getCenter().toString(), true);
-
-		eggMarker.setVisible(map.getZoomLevel() >= 13);
 	}
 
 	public void onDragEnd(MarkerDragEndEvent event) {
@@ -661,142 +644,6 @@ public class VGoogleMap extends Composite implements Paintable,
 
 		// And also in Vaadin debug window
 		ApplicationConnection.getConsole().log(message);
-	}
-
-	private void addEasterEggIcon() {
-		if (eggMarker != null) {
-			return;
-		}
-
-		Icon icon = Icon.newInstance(client
-				.translateVaadinUri("theme://icon/vaadin-logo.png"));
-
-		icon.setIconSize(Size.newInstance(32, 32));
-		icon.setIconAnchor(Point.newInstance(16, 16));
-
-		MarkerOptions mopts = MarkerOptions.newInstance(icon);
-
-		eggMarker = new Marker(LatLng.newInstance(60.4522, 22.3), mopts);
-
-		eggMarker.addMarkerClickHandler(new MarkerClickHandler() {
-			public void onClick(MarkerClickEvent event) {
-				toggleEasterEgg();
-			}
-		});
-
-		map.addOverlay(eggMarker);
-	}
-
-	// Easter egg :) Toggle a rotating 3d cube at IT Mill offices. Too bad
-	// it flickers a lot with the current version of the Maps API...
-	private void toggleEasterEgg() {
-		eggActive = !eggActive;
-		if (!eggActive) {
-			for (Overlay poly : knownPolygons.values()) {
-				map.addOverlay(poly);
-			}
-			return;
-		}
-
-		// Hide regular polygons
-		for (Overlay poly : knownPolygons.values()) {
-			map.removeOverlay(poly);
-		}
-
-		Timer timer = new Timer() {
-			double angle = 0;
-
-			// z = -1
-			double[][] backpoints = new double[][] { { -0.01, 0.01, 0.01 },
-					{ -0.01, 0.01, -0.01 }, { -0.01, -0.01, -0.01 },
-					{ -0.01, -0.01, 0.01 } };
-
-			// z = 1
-			double[][] frontpoints = new double[][] { { 0.01, 0.01, 0.01 },
-					{ 0.01, 0.01, -0.01 }, { 0.01, -0.01, -0.01 },
-					{ 0.01, -0.01, 0.01 } };
-
-			// {z, x, y}
-			int[] axis = new int[] { 0, 2, 1 };
-
-			double[] origo = new double[] {
-					eggMarker.getLatLng().getLongitude(),
-					eggMarker.getLatLng().getLatitude() };
-
-			Polygon[] polys = new Polygon[6];
-
-			String[] colors = new String[] { "#ff0000", "#00ff00", "#0000ff",
-					"#00ffff", "#ff00ff", "#ffff00" };
-
-			int frametime = 75;
-
-			@Override
-			public void run() {
-				long start = System.currentTimeMillis();
-
-				for (Polygon poly : polys) {
-					if (poly != null) {
-						map.removeOverlay(poly);
-					}
-				}
-
-				// Canceled: return and do not reschedule
-				if (!eggActive) {
-					return;
-				}
-
-				angle += 0.05;
-				angle %= Math.PI * 2;
-
-				double[][] pts1 = rotateProjectTranslate(backpoints, angle,
-						axis, origo);
-
-				double[][] pts2 = rotateProjectTranslate(frontpoints, angle,
-						axis, origo);
-
-				// This is slow so do this only once per coordinate
-				LatLng[] pcoords = new LatLng[] {
-						LatLng.newInstance(pts1[0][1], pts1[0][0]),
-						LatLng.newInstance(pts1[1][1], pts1[1][0]),
-						LatLng.newInstance(pts1[2][1], pts1[2][0]),
-						LatLng.newInstance(pts1[3][1], pts1[3][0]),
-
-						LatLng.newInstance(pts2[0][1], pts2[0][0]),
-						LatLng.newInstance(pts2[1][1], pts2[1][0]),
-						LatLng.newInstance(pts2[2][1], pts2[2][0]),
-						LatLng.newInstance(pts2[3][1], pts2[3][0]) };
-
-				// Build polygon vertices
-				LatLng[][] polyps = new LatLng[][] {
-						{ pcoords[0], pcoords[1], pcoords[2], pcoords[3],
-								pcoords[0] },
-						{ pcoords[0], pcoords[4], pcoords[7], pcoords[3],
-								pcoords[0] },
-						{ pcoords[2], pcoords[3], pcoords[7], pcoords[6],
-								pcoords[2] },
-						{ pcoords[0], pcoords[4], pcoords[5], pcoords[1],
-								pcoords[0] },
-						{ pcoords[1], pcoords[5], pcoords[6], pcoords[2],
-								pcoords[1] },
-						{ pcoords[4], pcoords[5], pcoords[6], pcoords[7],
-								pcoords[4] } };
-
-				// Build and add polygons to the map
-				for (int i = 0; i < polys.length; i++) {
-					polys[i] = new Polygon(polyps[i], "#ffffff", 0, 0,
-							colors[i], 0.25);
-					map.addOverlay(polys[i]);
-				}
-
-				// Try to sync frame length
-				int sleeptime = Math.max(1,
-						frametime - (int) (System.currentTimeMillis() - start));
-
-				schedule(sleeptime);
-			}
-		};
-
-		timer.schedule(1);
 	}
 
 	class InfoWindowOpener implements MarkerClickHandler {
@@ -1093,58 +940,4 @@ public class VGoogleMap extends Composite implements Paintable,
 					"Set width attempted before map initialized");
 		}
 	}
-
-	private static double[][] rotateProjectTranslate(double[][] points,
-			double angle, int[] axis, double[] origo) {
-
-		int camera_z = 100;
-
-		double[][] result = new double[points.length][3];
-
-		double[][] rotated = rotate3Dpoints(points, angle, axis);
-
-		for (int i = 0; i < rotated.length; i++) {
-			double p_x = rotated[i][1] * camera_z / (100 - rotated[i][0])
-					+ origo[0];
-			double p_y = rotated[i][2] * camera_z / (100 - rotated[i][0])
-					+ origo[1];
-
-			result[i] = new double[] { p_x, p_y };
-		}
-
-		return result;
-	}
-
-	// Math adapted from http://maettig.com/code/javascript/3d_dots.html
-	private static double[][] rotate3Dpoints(double[][] points, double angle,
-			int[] axis) {
-
-		double cosx = Math.cos(angle * axis[1]);
-		double sinx = Math.sin(angle * axis[1]);
-		double cosy = axis[1] == axis[2] ? cosx : Math.cos(angle * axis[2]);
-		double cosb = axis[1] == axis[2] ? sinx : Math.sin(angle * axis[2]);
-
-		double[][] rotated = new double[points.length][3];
-		for (int i = 0; i < points.length; i++) {
-			double z = points[i][0];
-			double x = points[i][1];
-			double y = points[i][2];
-
-			double u2 = x * cosx - y * sinx;
-			double v2 = x * sinx + y * cosx;
-			x = u2;
-			y = v2;
-
-			v2 = y * cosy - z * cosb;
-			z = y * cosb + z * cosy;
-
-			x = u2;
-			y = v2;
-
-			rotated[i] = new double[] { z, x, y };
-		}
-
-		return rotated;
-	}
-
 }

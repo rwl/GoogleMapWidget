@@ -234,9 +234,8 @@ public class GoogleMapWidgetApp extends Application {
 		// a new location
 		googleMap.addListener(new GoogleMap.MarkerMovedListener() {
 			public void markerMoved(Marker movedMarker) {
-				System.out.println("Evetn propagated! Marker: "
-						+ movedMarker.getTitle() + " moved. New loc: "
-						+ movedMarker.getLatLng().toString());
+				System.out.println("Marker " + movedMarker.getTitle()
+						+ " moved to " + movedMarker.getLatLng().toString());
 			}
 		});
 	}

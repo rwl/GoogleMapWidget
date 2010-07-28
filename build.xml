@@ -35,7 +35,7 @@
 		<property name="gwt-maps" value="WebContent/WEB-INF/lib/gwt-maps.jar" />
 		
 		<!-- The version of the build -->
-		<property name="version" value="0.9.7" />
+		<property name="version" value="0.9.8" />
 		
 		<!-- The filename of the built packages -->
 		<property name="filename" value="googlemapwidget-${version}"></property>
