@@ -9,7 +9,7 @@ import org.vaadin.hezamu.googlemapwidget.GoogleMap;
 public class BasicMarkerSource implements MarkerSource, Serializable {
 	private static final long serialVersionUID = -803448463650898130L;
 
-	private List<Marker> markers = new ArrayList<Marker>();
+	private final List<Marker> markers = new ArrayList<Marker>();
 
 	public List<Marker> getMarkers() {
 		return markers;
@@ -41,8 +41,13 @@ public class BasicMarkerSource implements MarkerSource, Serializable {
 			markerJSON.append(",\"info\":"
 					+ (marker.getInfoWindowContent() != null));
 			markerJSON.append(",\"draggable\":" + marker.isDraggable());
+
 			if (marker.getIconUrl() != null) {
 				markerJSON.append(",\"icon\":\"" + marker.getIconUrl() + "\"");
+				markerJSON.append(",\"iconAnchorX\":"
+						+ marker.getIconAnchor().x);
+				markerJSON.append(",\"iconAnchorY\":"
+						+ marker.getIconAnchor().y);
 			}
 
 			markerJSON.append("}");
@@ -54,7 +59,7 @@ public class BasicMarkerSource implements MarkerSource, Serializable {
 		try {
 			return ("[" + markerJSON + "]").getBytes("UTF-8");
 		} catch (Exception e) {
-			return  ("[" + markerJSON + "]").getBytes();
+			return ("[" + markerJSON + "]").getBytes();
 		}
 	}
 
@@ -63,7 +68,7 @@ public class BasicMarkerSource implements MarkerSource, Serializable {
 	}
 
 	public Marker getMarker(String markerId) {
-		// TODO This is pretty silly, the marker collection should be a map
+		// TODO The marker collection should be a map...
 		for (Marker marker : markers) {
 			if (marker.getId().toString().equals(markerId)) {
 				return marker;

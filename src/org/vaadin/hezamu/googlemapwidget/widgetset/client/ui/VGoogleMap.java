@@ -263,20 +263,23 @@ public class VGoogleMap extends Composite implements Paintable,
 
 						}
 					};
+
 					apiLoadWaitTimer.schedule(100);
 				}
+
 				if (this.uidl == null) {
 					ApplicationConnection
 							.getConsole()
 							.error("The ArrayList holding UIDL updates was NULL, this should never happen!");
 					this.uidl = new ArrayList<UIDL>();
 				}
+
 				this.uidl.add(uidl);
+
 				return;
-
 			}
-
 		}
+
 		if (apiLoadWaitTimer != null) {
 			apiLoadWaitTimer.cancel();
 			apiLoadWaitTimer = null;
@@ -559,11 +562,15 @@ public class VGoogleMap extends Composite implements Paintable,
 
 	private Marker createMarker(JSONNumber jsLat, JSONNumber jsLng,
 			JSONString jsTitle, JSONBoolean jsVisible, JSONString jsIcon,
-			JSONBoolean jsDraggable) {
+			int iconAnchorX, int iconAnchorY, JSONBoolean jsDraggable) {
 
 		Icon icon = null;
 		if (jsIcon != null) {
 			icon = Icon.newInstance(jsIcon.stringValue());
+			icon.setIconAnchor(Point.newInstance(iconAnchorX, iconAnchorY));
+
+			log(1, "Icon URL '" + jsIcon.stringValue() + "' at anchor point ("
+					+ iconAnchorX + "," + iconAnchorY + ")");
 		}
 
 		MarkerOptions mopts;
@@ -590,6 +597,13 @@ public class VGoogleMap extends Composite implements Paintable,
 		}
 
 		return new Marker(LatLng.newInstance(lat, lng), mopts);
+	}
+
+	private String getMarkerIconURL(Marker marker) {
+		if (marker.getIcon() == null)
+			return null;
+
+		return marker.getIcon().getImageURL();
 	}
 
 	public void onClick(MapClickEvent event) {
@@ -634,9 +648,7 @@ public class VGoogleMap extends Composite implements Paintable,
 						.getLatLng().getLongitude(), true);
 				break;
 			}
-
 		}
-
 	}
 
 	protected void markerClicked(String mId) {
@@ -770,8 +782,8 @@ public class VGoogleMap extends Composite implements Paintable,
 									.get("draggable")).booleanValue()));
 							isOldMarker = true;
 						}
-
 					}
+
 					// Add maker to list of markers in this update
 					markersFromThisUpdate.add(jsMID.toString());
 
@@ -840,7 +852,7 @@ public class VGoogleMap extends Composite implements Paintable,
 							continue;
 					}
 
-					// Change posision, if changed
+					// Change position, if changed
 					if (marker != null && jsLat != null && jsLng != null
 							&& marker.getLatLng() != null) {
 						LatLng llang = marker.getLatLng();
@@ -850,15 +862,46 @@ public class VGoogleMap extends Composite implements Paintable,
 						if (!llang.isEquals(llang2)) {
 							marker.setLatLng(llang2);
 						}
-
 					}
 
 					// Read marker icon
 					if ((value = jsMarker.get("icon")) == null) {
 						jsIcon = null;
+						if (marker != null && getMarkerIconURL(marker) != null) {
+							replaceMarker = true;
+						}
 					} else if ((jsIcon = value.isString()) == null) {
 						if (!isOldMarker)
 							continue;
+					} else {
+						if (marker != null
+								&& getMarkerIconURL(marker) != jsIcon
+										.toString()) {
+							replaceMarker = true;
+						}
+					}
+
+					int iconAnchorX = 0;
+					if ((value = jsMarker.get("iconAnchorX")) != null) {
+						JSONNumber jsAnchorX;
+						if ((jsAnchorX = value.isNumber()) != null) {
+							log(1, "Anchor X: " + jsAnchorX.toString());
+							iconAnchorX = (int) Math.round(jsAnchorX
+									.doubleValue());
+						} else {
+							log(1, "Anchor X NaN");
+						}
+					} else {
+						log(1, "Anchor X property not found");
+					}
+
+					int iconAnchorY = 0;
+					if ((value = jsMarker.get("iconAnchorY")) != null) {
+						JSONNumber jsAnchorY;
+						if ((jsAnchorY = value.isNumber()) != null) {
+							iconAnchorY = (int) Math.round(jsAnchorY
+									.doubleValue());
+						}
 					}
 
 					// do not create new one if old found (only if we want to
@@ -876,7 +919,7 @@ public class VGoogleMap extends Composite implements Paintable,
 					}
 
 					marker = createMarker(jsLat, jsLng, jsTitle, jsVisible,
-							jsIcon, jsDraggable);
+							jsIcon, iconAnchorX, iconAnchorY, jsDraggable);
 
 					if (marker != null) {
 						map.addOverlay(marker);

@@ -14,6 +14,8 @@ public class BasicMarker implements Marker {
 
 	private String iconUrl = null;
 
+	private Point2D.Double iconAnchor;
+
 	private String title = null;
 
 	private InfoWindowTab[] infoWindowContent = null;
@@ -58,6 +60,14 @@ public class BasicMarker implements Marker {
 		iconUrl = imageUrl;
 	}
 
+	public Point2D.Double getIconAnchor() {
+		return iconAnchor;
+	}
+
+	public void setIconAnchor(Point2D.Double iconAnchor) {
+		this.iconAnchor = iconAnchor;
+	}
+
 	public String getTitle() {
 		return title;
 	}
@@ -86,5 +96,5 @@ public class BasicMarker implements Marker {
 	public void setDraggable(boolean draggable) {
 		this.draggable = draggable;
 	}
-	
+
 }

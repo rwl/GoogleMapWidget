@@ -9,23 +9,28 @@ import org.vaadin.hezamu.googlemapwidget.overlay.Marker;
 import com.vaadin.Application;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.Window.Notification;
 
+@SuppressWarnings("serial")
 public class GoogleMapWidgetApp extends Application {
-	private static final long serialVersionUID = -921015383668899594L;
-	private Marker mark1;
-	private Marker mark2;
 	private GoogleMap googleMap;
+
+	private BasicMarker mark1;
+
+	private BasicMarker mark2;
+
 	private BasicMarker mark3;
+
 	private BasicMarker mark4;
+
 	private BasicMarker mark5;
-	private final int i = 0;
 
 	@Override
 	public void init() {
-		setMainWindow(new Window("GoogleMapWidgetApp"));
+		setMainWindow(new Window("Google Map add-on demo"));
 
 		// Create a new map instance centered on the IT Mill offices
 		googleMap = new GoogleMap(this, new Point2D.Double(22.3, 60.4522), 8);
@@ -35,25 +40,25 @@ public class GoogleMapWidgetApp extends Application {
 
 		// Create a marker at the IT Mill offices
 		mark1 = new BasicMarker(1L, new Point2D.Double(22.3, 60.4522),
-				"Test marker1");
+				"Test marker 1");
 
 		mark2 = new BasicMarker(2L, new Point2D.Double(22.4, 60.4522),
-				"Test marker2 ");
+				"Test marker 2");
 
 		mark3 = new BasicMarker(4L, new Point2D.Double(22.6, 60.4522),
-				"Test marker3 ");
+				"Test marker 3");
 
 		mark4 = new BasicMarker(5L, new Point2D.Double(22.7, 60.4522),
-				"Test marker4");
+				"Test marker 4");
 
 		// Marker with information window pupup
 		mark5 = new BasicMarker(6L, new Point2D.Double(22.8, 60.4522),
-				"Marker5");
-		mark5.setInfoWindowContent(googleMap, new Label("Hello"));
+				"Marker 5");
+		mark5.setInfoWindowContent(googleMap, new Label("Hello Marker 5!"));
 
-		Label content = new Label("Hello");
+		Label content = new Label("Hello Marker 2!");
 		content.setWidth("60px");
-		((BasicMarker) mark2).setInfoWindowContent(googleMap, content);
+		(mark2).setInfoWindowContent(googleMap, content);
 
 		googleMap.addMarker(mark1);
 		googleMap.addMarker(mark2);
@@ -62,180 +67,13 @@ public class GoogleMapWidgetApp extends Application {
 		googleMap.addMarker(mark5);
 		getMainWindow().getContent().addComponent(googleMap);
 
-		final Button b = new Button("Marker 3 is draggable: "
-				+ mark3.isDraggable());
-		b.addListener(new Button.ClickListener() {
-			private static final long serialVersionUID = -9120699719811785224L;
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				mark3.setDraggable(!mark3.isDraggable());
-				b.setCaption("Marker 3 is draggable: " + mark3.isDraggable());
-				googleMap.requestRepaint();
-			}
-
-		});
-
-		final Button b2 = new Button("Marker 4 is visible: "
-				+ mark4.isVisible());
-		b2.addListener(new Button.ClickListener() {
-			private static final long serialVersionUID = 3281713274525655809L;
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				mark4.setVisible(!mark4.isVisible());
-				b2.setCaption("Marker 4 is visible: " + mark4.isVisible());
-				googleMap.requestRepaint();
-			}
-		});
-
-		final Button b3 = new Button("Randomize Marker 5 location ");
-		b3.addListener(new Button.ClickListener() {
-			private static final long serialVersionUID = 8603447515298318466L;
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				mark5.setTitle(mark5.getTitle() + i);
-				Random r = new Random();
-
-				int val1 = r.nextInt(10);
-				int val2 = r.nextInt(10);
-				mark5.setLatLng(new Point2D.Double(
-						22.8 + ((double) val1) / 100L,
-						60.4522 + ((double) val2) / 100L));
-				googleMap.requestRepaint();
-			}
-		});
-
-		final Button b4 = new Button("Set this title to marker 5: "
-				+ mark5.getTitle() + i);
-		b4.addListener(new Button.ClickListener() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				mark5.setTitle(mark5.getTitle() + i);
-				b4.setCaption("Set this title to marker 5: " + mark5.getTitle()
-						+ i);
-				googleMap.requestRepaint();
-
-			}
-
-		});
-
-		HorizontalLayout hl = new HorizontalLayout();
-		Label l = new Label("These didn't work before: ");
-		l.setSizeUndefined();
-		hl.setSpacing(true);
-		hl.addComponent(l);
-		hl.addComponent(b);
-		hl.addComponent(b2);
-		hl.addComponent(b3);
-		hl.addComponent(b4);
-
-		getMainWindow().getContent().addComponent(hl);
-
-		extendedFeatures();
-
-		popupTest();
-
-		Button resize = new Button("resize", new Button.ClickListener() {
-			private static final long serialVersionUID = 3616458938424224832L;
-
-			public void buttonClick(ClickEvent event) {
-				googleMap.setHeight("200px");
-				googleMap.setWidth("200px");
-
-			}
-
-		});
-
-		getMainWindow().addComponent(resize);
-	}
-
-	private void popupTest() {
-		Button popupB = new Button("popup", new Button.ClickListener() {
-			private static final long serialVersionUID = -6394624551407250559L;
-
-			public void buttonClick(ClickEvent event) {
-				Application app = event.getButton().getApplication();
-
-				GoogleMap map2 = new GoogleMap(event.getButton()
-						.getApplication(), new Point2D.Double(22.3, 60.4522), 8);
-
-				// map2.setHeight("240px");
-				// map2.setWidth("300px");
-
-				map2.setHeight("240px");
-				map2.setWidth("240px");
-
-				Window w = new Window("popup");
-				w.addComponent(map2);
-				w.setHeight("300px");
-				w.setWidth("300px");
-
-				app.getMainWindow().addWindow(w);
-
-			}
-		});
-
-		getMainWindow().addComponent(popupB);
-	}
-
-	/**
-	 * Demo of some of the extended features of the google maps widget
-	 */
-	private void extendedFeatures() {
-
-		// Remove a marker from the map
-		Button removeMarker = new Button("Remove \"Test marker2\"",
-				new Button.ClickListener() {
-					private static final long serialVersionUID = -8593284561770538538L;
-
-					public void buttonClick(ClickEvent event) {
-						googleMap.removeMarker(mark2);
-					}
-				});
-
-		getMainWindow().addComponent(removeMarker);
-
-		// Remove a marker from the map
-		Button addMarker = new Button("Add \"Test marker2\"",
-				new Button.ClickListener() {
-					private static final long serialVersionUID = 6973907146984242699L;
-
-					public void buttonClick(ClickEvent event) {
-						googleMap.addMarker(mark2);
-					}
-				});
-
-		getMainWindow().addComponent(addMarker);
-
-		// Remove a marker from the map
-		Button clientLogging = new Button("Enable client logging",
-				new Button.ClickListener() {
-					private static final long serialVersionUID = -9221899142449844922L;
-
-					public void buttonClick(ClickEvent event) {
-						Button b = event.getButton();
-						if (b.getCaption().startsWith("Enable")) {
-							googleMap.setClientLogLevel(1);
-							b.setCaption("Disable client logging");
-						} else {
-							googleMap.setClientLogLevel(0);
-							b.setCaption("Enable client logging");
-						}
-					}
-				});
-
-		getMainWindow().addComponent(clientLogging);
-
 		// Add a Marker click listener to catch marker click events.
 		// Note, works only if marker has information window content
 		googleMap.addListener(new GoogleMap.MarkerClickListener() {
 			public void markerClicked(Marker clickedMarker) {
-				System.out.println("Marker:" + clickedMarker.getTitle()
-						+ " clicked");
+				getMainWindow().showNotification(
+						"Marker " + clickedMarker.getTitle() + " clicked",
+						Notification.TYPE_TRAY_NOTIFICATION);
 			}
 		});
 
@@ -243,9 +81,136 @@ public class GoogleMapWidgetApp extends Application {
 		// a new location
 		googleMap.addListener(new GoogleMap.MarkerMovedListener() {
 			public void markerMoved(Marker movedMarker) {
-				System.out.println("Marker " + movedMarker.getTitle()
-						+ " moved to " + movedMarker.getLatLng().toString());
+				getMainWindow().showNotification(
+						"Marker " + movedMarker.getTitle() + " moved to "
+								+ movedMarker.getLatLng().toString(),
+						Notification.TYPE_TRAY_NOTIFICATION);
 			}
 		});
+
+		addTestButtons(); // Add buttons that trigger tests map features
+	}
+
+	private void addTestButtons() {
+		GridLayout grid = new GridLayout(5, 1);
+		getMainWindow().addComponent(grid);
+
+		grid.addComponent(new Button("Toggle marker 3 draggability",
+				new Button.ClickListener() {
+					@Override
+					public void buttonClick(ClickEvent event) {
+						mark3.setDraggable(!mark3.isDraggable());
+						googleMap.requestRepaint();
+					}
+				}));
+
+		grid.addComponent(new Button("Toggle marker 4 visibility",
+				new Button.ClickListener() {
+					@Override
+					public void buttonClick(ClickEvent event) {
+						mark4.setVisible(!mark4.isVisible());
+						googleMap.requestRepaint();
+					}
+				}));
+
+		grid.addComponent(new Button("Randomize Marker 5 location",
+				new Button.ClickListener() {
+					@Override
+					public void buttonClick(ClickEvent event) {
+						Random r = new Random();
+
+						mark5.setLatLng(new Point2D.Double(
+								22.8 + r.nextFloat() / 10, 60.4522 + r
+										.nextFloat() / 10));
+
+						googleMap.requestRepaint();
+					}
+				}));
+
+		grid.addComponent(new Button("Update marker 5 title",
+				new Button.ClickListener() {
+					@Override
+					public void buttonClick(ClickEvent event) {
+						String chars = new String("asd123.,#€%&öäåÖÄÅ");
+						mark5.setTitle(mark5.getTitle()
+								+ chars.charAt(new Random().nextInt(chars
+										.length())));
+						googleMap.requestRepaint();
+					}
+				}));
+
+		grid.addComponent(new Button("Remove \"Test marker2\"",
+				new Button.ClickListener() {
+					public void buttonClick(ClickEvent event) {
+						googleMap.removeMarker(mark2);
+					}
+				}));
+
+		grid.addComponent(new Button("Add \"Test marker2\"",
+				new Button.ClickListener() {
+					public void buttonClick(ClickEvent event) {
+						googleMap.addMarker(mark2);
+					}
+				}));
+
+		grid.addComponent(new Button("Toggle marker 1 icon",
+				new Button.ClickListener() {
+					public void buttonClick(ClickEvent event) {
+						if (mark1.getIconUrl() == null) {
+							mark1.setIconUrl("http://bits.ohloh.net/attachments/18966/v_med.gif");
+							mark1.setIconAnchor(new Point2D.Double(20, -20));
+						} else {
+							mark1.setIconUrl(null);
+						}
+
+						googleMap.requestRepaint();
+					}
+				}));
+
+		grid.addComponent(new Button("Toggle client logging",
+				new Button.ClickListener() {
+					public void buttonClick(ClickEvent event) {
+						if (googleMap.getClientLogLevel() == 0) {
+							googleMap.setClientLogLevel(1);
+							getMainWindow().showNotification(
+									"Client logging enabled",
+									Notification.TYPE_TRAY_NOTIFICATION);
+						} else {
+							googleMap.setClientLogLevel(0);
+							getMainWindow().showNotification(
+									"Client logging enabled",
+									Notification.TYPE_TRAY_NOTIFICATION);
+						}
+					}
+				}));
+
+		// Popup test
+		grid.addComponent(new Button("Open a map in a popup",
+				new Button.ClickListener() {
+					public void buttonClick(ClickEvent event) {
+						Application app = event.getButton().getApplication();
+
+						GoogleMap map2 = new GoogleMap(event.getButton()
+								.getApplication(), new Point2D.Double(22.3,
+								60.4522), 8);
+
+						map2.setHeight("240px");
+						map2.setWidth("240px");
+
+						Window w = new Window("popup");
+						w.addComponent(map2);
+						w.setHeight("300px");
+						w.setWidth("300px");
+
+						app.getMainWindow().addWindow(w);
+					}
+				}));
+
+		grid.addComponent(new Button("Resize map", new Button.ClickListener() {
+			public void buttonClick(ClickEvent event) {
+				googleMap.setHeight("200px");
+				googleMap.setWidth("200px");
+			}
+		}));
 	}
 }

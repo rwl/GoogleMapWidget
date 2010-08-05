@@ -592,6 +592,14 @@ public class GoogleMap extends AbstractComponent {
 	}
 
 	/**
+	 * Get the level of verbosity the client side uses for tracing or displaying
+	 * error messages.
+	 */
+	public int getClientLogLevel() {
+		return clientLogLevel;
+	}
+
+	/**
 	 * Get the coordinates of the north-east corner of the map.
 	 * 
 	 * @return
