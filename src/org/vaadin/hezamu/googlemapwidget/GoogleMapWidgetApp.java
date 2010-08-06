@@ -5,6 +5,7 @@ import java.util.Random;
 
 import org.vaadin.hezamu.googlemapwidget.overlay.BasicMarker;
 import org.vaadin.hezamu.googlemapwidget.overlay.Marker;
+import org.vaadin.hezamu.googlemapwidget.overlay.Polygon;
 
 import com.vaadin.Application;
 import com.vaadin.ui.Button;
@@ -92,7 +93,9 @@ public class GoogleMapWidgetApp extends Application {
 	}
 
 	private void addTestButtons() {
-		GridLayout grid = new GridLayout(5, 1);
+		GridLayout grid = new GridLayout(4, 1);
+		grid.setSpacing(true);
+
 		getMainWindow().addComponent(grid);
 
 		grid.addComponent(new Button("Toggle marker 3 draggability",
@@ -208,9 +211,37 @@ public class GoogleMapWidgetApp extends Application {
 
 		grid.addComponent(new Button("Resize map", new Button.ClickListener() {
 			public void buttonClick(ClickEvent event) {
-				googleMap.setHeight("200px");
-				googleMap.setWidth("200px");
+				if (googleMap.getHeight() == 200) {
+					googleMap.setWidth("640px");
+					googleMap.setHeight("480px");
+				} else {
+					googleMap.setHeight("200px");
+					googleMap.setWidth("200px");
+				}
 			}
 		}));
+
+		grid.addComponent(new Button("Draw polygon",
+				new Button.ClickListener() {
+					public void buttonClick(ClickEvent event) {
+						// Location of Vaadin Ltd offices
+						Point2D.Double c = new Point2D.Double(22.3, 60.4522);
+
+						double delta = 0.75;
+
+						Point2D.Double[] corners = new Point2D.Double[] {
+								new Point2D.Double(c.x - delta, c.y + delta),
+								new Point2D.Double(c.x + delta, c.y + delta),
+								new Point2D.Double(c.x + delta, c.y - delta),
+								new Point2D.Double(c.x - delta, c.y - delta),
+								new Point2D.Double(c.x - delta, c.y + delta) };
+
+						Polygon poly = new Polygon(new Random().nextLong(),
+								corners, "#f04040", 5, 0.8, "#1010ff", 0.2,
+								false);
+
+						googleMap.addPolyOverlay(poly);
+					}
+				}));
 	}
 }
