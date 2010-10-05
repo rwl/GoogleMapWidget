@@ -33,21 +33,34 @@ public class BasicMarkerSource implements MarkerSource, Serializable {
 		for (int i = 0; i < markers.size(); i++) {
 			Marker marker = markers.get(i);
 
-			markerJSON.append("{\"mid\":\"" + marker.getId());
-			markerJSON.append("\",\"lat\":" + marker.getLatLng().y);
-			markerJSON.append(",\"lng\":" + marker.getLatLng().x);
-			markerJSON.append(",\"title\":\"" + marker.getTitle());
-			markerJSON.append("\",\"visible\":" + marker.isVisible());
-			markerJSON.append(",\"info\":"
-					+ (marker.getInfoWindowContent() != null));
-			markerJSON.append(",\"draggable\":" + marker.isDraggable());
+			markerJSON.append("{\"mid\":\"").append(marker.getId());
+			markerJSON.append("\",\"lat\":").append(marker.getLatLng().y);
+			markerJSON.append(",\"lng\":").append(marker.getLatLng().x);
+
+			// Escape single and double quotes
+			markerJSON.append(",\"title\":\"").append(
+					marker.getTitle().replaceAll("'", "\'")
+							.replaceAll("\"", "\\\\\""));
+
+			markerJSON.append("\",\"visible\":").append(marker.isVisible());
+			markerJSON.append(",\"info\":").append(
+					marker.getInfoWindowContent() != null);
+			markerJSON.append(",\"draggable\":").append(marker.isDraggable());
 
 			if (marker.getIconUrl() != null) {
-				markerJSON.append(",\"icon\":\"" + marker.getIconUrl() + "\"");
-				markerJSON.append(",\"iconAnchorX\":"
-						+ marker.getIconAnchor().x);
-				markerJSON.append(",\"iconAnchorY\":"
-						+ marker.getIconAnchor().y);
+				markerJSON.append(",\"icon\":\"").append(
+						marker.getIconUrl() + "\"");
+				if (marker.getIconAnchor() != null) {
+					markerJSON.append(",\"iconAnchorX\":").append(
+							marker.getIconAnchor().x);
+					markerJSON.append(",\"iconAnchorY\":").append(
+							marker.getIconAnchor().y);
+				} else {
+					markerJSON.append(",\"iconAnchorX\":").append(
+							marker.getLatLng().x);
+					markerJSON.append(",\"iconAnchorY\":").append(
+							marker.getLatLng().y);
+				}
 			}
 
 			markerJSON.append("}");

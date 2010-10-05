@@ -3,6 +3,7 @@ package org.vaadin.hezamu.googlemapwidget;
 import java.awt.geom.Point2D;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,8 +59,6 @@ public class GoogleMap extends AbstractComponent {
 
 	private final Map<Long, PolyOverlay> overlays = new HashMap<Long, PolyOverlay>();
 
-	private boolean overlaysChanged = false;
-
 	private boolean scrollWheelZoomEnabled = true;
 
 	private boolean clearMapTypes = false;
@@ -69,6 +68,8 @@ public class GoogleMap extends AbstractComponent {
 	private final List<CustomMapType> mapTypes = new ArrayList<CustomMapType>();
 
 	private boolean mapTypesChanged = false;
+
+	private boolean reportMapBounds = false;
 
 	private final ApplicationResource markerResource = new ApplicationResource() {
 		private static final long serialVersionUID = -6926454922185543547L;
@@ -213,41 +214,37 @@ public class GoogleMap extends AbstractComponent {
 			closeInfoWindow = false;
 		}
 
-		if (overlaysChanged) {
-			target.startTag("overlays");
+		target.startTag("overlays");
 
-			for (PolyOverlay poly : overlays.values()) {
-				target.startTag("o");
-				target.addAttribute("id", poly.getId());
+		for (PolyOverlay poly : overlays.values()) {
+			target.startTag("o");
+			target.addAttribute("id", poly.getId());
 
-				// Encode polyline points as a string attribute
-				StringBuilder sb = new StringBuilder();
-				Point2D.Double[] points = poly.getPoints();
-				for (int i = 0; i < points.length; i++) {
-					if (i > 0) {
-						sb.append(" ");
-					}
-					sb.append("" + points[i].y + "," + points[i].x);
+			// Encode polyline points as a string attribute
+			StringBuilder sb = new StringBuilder();
+			Point2D.Double[] points = poly.getPoints();
+			for (int i = 0; i < points.length; i++) {
+				if (i > 0) {
+					sb.append(" ");
 				}
-				target.addAttribute("points", sb.toString());
-
-				target.addAttribute("color", poly.getColor());
-				target.addAttribute("weight", poly.getWeight());
-				target.addAttribute("opacity", poly.getOpacity());
-				target.addAttribute("clickable", poly.isClickable());
-
-				if (poly instanceof Polygon) {
-					Polygon polygon = (Polygon) poly;
-					target.addAttribute("fillcolor", polygon.getFillColor());
-					target.addAttribute("fillopacity", polygon.getFillOpacity());
-				}
-				target.endTag("o");
+				sb.append("" + points[i].y + "," + points[i].x);
 			}
+			target.addAttribute("points", sb.toString());
 
-			target.endTag("overlays");
+			target.addAttribute("color", poly.getColor());
+			target.addAttribute("weight", poly.getWeight());
+			target.addAttribute("opacity", poly.getOpacity());
+			target.addAttribute("clickable", poly.isClickable());
 
-			overlaysChanged = false;
+			if (poly instanceof Polygon) {
+				Polygon polygon = (Polygon) poly;
+				target.addAttribute("fillcolor", polygon.getFillColor());
+				target.addAttribute("fillopacity", polygon.getFillOpacity());
+			}
+			target.endTag("o");
 		}
+
+		target.endTag("overlays");
 
 		if (clearMapTypes) {
 			target.addAttribute("clearMapTypes", true);
@@ -264,6 +261,11 @@ public class GoogleMap extends AbstractComponent {
 			target.endTag("mapTypes");
 
 			mapTypesChanged = false;
+		}
+
+		if (reportMapBounds) {
+			target.addAttribute("reportBounds", true);
+			reportMapBounds = false;
 		}
 	}
 
@@ -646,7 +648,6 @@ public class GoogleMap extends AbstractComponent {
 	public boolean addPolyOverlay(PolyOverlay overlay) {
 		if (!overlays.containsKey(overlay.getId())) {
 			overlays.put(overlay.getId(), overlay);
-			overlaysChanged = true;
 			requestRepaint();
 			return true;
 		}
@@ -666,7 +667,6 @@ public class GoogleMap extends AbstractComponent {
 	public boolean updateOverlay(PolyOverlay overlay) {
 		if (overlays.containsKey(overlay.getId())) {
 			overlays.put(overlay.getId(), overlay);
-			overlaysChanged = true;
 			requestRepaint();
 			return true;
 		}
@@ -686,12 +686,20 @@ public class GoogleMap extends AbstractComponent {
 	public boolean removeOverlay(PolyOverlay overlay) {
 		if (overlays.containsKey(overlay.getId())) {
 			overlays.remove(overlay.getId());
-			overlaysChanged = true;
 			requestRepaint();
 			return true;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the collection of {@link PolyOverlay}s currently in the map.
+	 * 
+	 * @return a {@link Collection} of overlays.
+	 */
+	public Collection<PolyOverlay> getOverlays() {
+		return overlays.values();
 	}
 
 	private static Point2D.Double strToLL(String latLngStr) {
@@ -734,7 +742,6 @@ public class GoogleMap extends AbstractComponent {
 	 * @param marker
 	 */
 	public void removeMarker(Marker marker) {
-
 		if (markerSource != null) {
 			markerSource.getMarkers().remove(marker);
 			requestRepaint();
@@ -742,7 +749,6 @@ public class GoogleMap extends AbstractComponent {
 	}
 
 	public void removeAllMarkers() {
-
 		if (markerSource != null) {
 			markerSource.getMarkers().clear();
 			requestRepaint();
@@ -792,6 +798,11 @@ public class GoogleMap extends AbstractComponent {
 	public void clearMapTypes() {
 		mapTypes.clear();
 		clearMapTypes = true;
+		requestRepaint();
+	}
+
+	public void reportMapBounds() {
+		reportMapBounds = true;
 		requestRepaint();
 	}
 

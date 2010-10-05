@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.http.client.Request;
@@ -415,6 +416,8 @@ public class VGoogleMap extends Composite implements Paintable,
 			}
 		}
 
+		Map<Integer, Overlay> newPolys = new HashMap<Integer, Overlay>();
+
 		// Process polygon/polyline overlays and map types
 		for (final Iterator<Object> it = uidl.getChildIterator(); it.hasNext();) {
 			final UIDL u = (UIDL) it.next();
@@ -434,8 +437,7 @@ public class VGoogleMap extends Composite implements Paintable,
 					}
 
 					if (poly != null) {
-						knownPolygons.put(polyUIDL.getIntAttribute("id"), poly);
-						map.addOverlay(poly);
+						newPolys.put(polyUIDL.getIntAttribute("id"), poly);
 					}
 				}
 
@@ -456,11 +458,38 @@ public class VGoogleMap extends Composite implements Paintable,
 			}
 		}
 
+		// Remove deleted overlays from the map
+		List<Integer> removedPolyIds = new ArrayList<Integer>();
+		for (Entry<Integer, Overlay> entry : knownPolygons.entrySet()) {
+			if (!newPolys.containsKey(entry.getKey())) {
+				map.removeOverlay(entry.getValue());
+				removedPolyIds.add(entry.getKey());
+			}
+		}
+
+		// ... and from the map. Can't remove them while iterating the
+		// collection
+		for (Integer id : removedPolyIds)
+			knownPolygons.remove(id);
+
+		// Add new overlays
+		for (Entry<Integer, Overlay> entry : newPolys.entrySet()) {
+			if (!knownPolygons.containsKey(entry.getKey())) {
+				knownPolygons.put(entry.getKey(), entry.getValue());
+				map.addOverlay(entry.getValue());
+			}
+		}
+
 		if (uidl.hasAttribute("closeInfoWindow")) {
 			map.getInfoWindow().close();
 		}
 
 		ignoreVariableChanges = false;
+
+		if (uidl.hasAttribute("reportBounds")
+				&& uidl.getBooleanAttribute("reportBounds") == true) {
+			reportMapBounds();
+		}
 
 		log(1,
 				"IGoogleMap.updateFromUIDL() took "
@@ -596,7 +625,10 @@ public class VGoogleMap extends Composite implements Paintable,
 			return null;
 		}
 
-		return new Marker(LatLng.newInstance(lat, lng), mopts);
+		Marker result = new Marker(LatLng.newInstance(lat, lng), mopts);
+		result.setVisible(jsVisible.booleanValue());
+
+		return result;
 	}
 
 	private String getMarkerIconURL(Marker marker) {
@@ -624,6 +656,10 @@ public class VGoogleMap extends Composite implements Paintable,
 			return;
 		}
 
+		reportMapBounds();
+	}
+
+	private void reportMapBounds() {
 		client.updateVariable(paintableId, "zoom", map.getZoomLevel(), false);
 		client.updateVariable(paintableId, "bounds_ne", map.getBounds()
 				.getNorthEast().toString(), false);
@@ -824,6 +860,7 @@ public class VGoogleMap extends Composite implements Paintable,
 							// if title is changed
 							if (!jsTitle.stringValue().equals(title)) {
 								replaceMarker = true;
+								log(1, "Title changed: " + marker.getTitle());
 							}
 						}
 					}
@@ -837,8 +874,18 @@ public class VGoogleMap extends Composite implements Paintable,
 						if (!isOldMarker)
 							continue;
 					} else {
-						if (marker != null)
+						if (marker != null) {
+							boolean old = marker.isVisible();
+
 							marker.setVisible(jsVisible.booleanValue());
+
+							if (old != marker.isVisible()) {
+								log(1,
+										"Toggled marker '" + marker.getTitle()
+												+ "' visibility to "
+												+ jsVisible.booleanValue());
+							}
+						}
 					}
 
 					// Read marker draggability (is that a word? :)
@@ -867,8 +914,15 @@ public class VGoogleMap extends Composite implements Paintable,
 					// Read marker icon
 					if ((value = jsMarker.get("icon")) == null) {
 						jsIcon = null;
-						if (marker != null && getMarkerIconURL(marker) != null) {
-							replaceMarker = true;
+						if (marker != null) {
+							String currentURL = getMarkerIconURL(marker);
+							if (!currentURL
+									.startsWith("http://maps.gstatic.com")
+									&& currentURL != null && currentURL != "") {
+								replaceMarker = true;
+								log(1, "Icon url changed " + marker.getTitle()
+										+ " from '" + currentURL + "'");
+							}
 						}
 					} else if ((jsIcon = value.isString()) == null) {
 						if (!isOldMarker)
@@ -878,6 +932,7 @@ public class VGoogleMap extends Composite implements Paintable,
 								&& getMarkerIconURL(marker) != jsIcon
 										.toString()) {
 							replaceMarker = true;
+							log(1, "Icon url changed 2 " + marker.getTitle());
 						}
 					}
 
@@ -891,8 +946,6 @@ public class VGoogleMap extends Composite implements Paintable,
 						} else {
 							log(1, "Anchor X NaN");
 						}
-					} else {
-						log(1, "Anchor X property not found");
 					}
 
 					int iconAnchorY = 0;
@@ -914,6 +967,7 @@ public class VGoogleMap extends Composite implements Paintable,
 												// there is no previous one
 
 					if (replaceMarker) {
+						log(1, "Replacing marker " + marker.getTitle());
 						map.removeOverlay(marker);
 						markersFromThisUpdate.remove(marker);
 					}

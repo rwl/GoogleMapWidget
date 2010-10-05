@@ -1,10 +1,14 @@
 package org.vaadin.hezamu.googlemapwidget;
 
 import java.awt.geom.Point2D;
+import java.util.Collection;
 import java.util.Random;
 
+import org.vaadin.hezamu.googlemapwidget.GoogleMap.MapControl;
+import org.vaadin.hezamu.googlemapwidget.GoogleMap.MarkerClickListener;
 import org.vaadin.hezamu.googlemapwidget.overlay.BasicMarker;
 import org.vaadin.hezamu.googlemapwidget.overlay.Marker;
+import org.vaadin.hezamu.googlemapwidget.overlay.PolyOverlay;
 import org.vaadin.hezamu.googlemapwidget.overlay.Polygon;
 
 import com.vaadin.Application;
@@ -52,9 +56,24 @@ public class GoogleMapWidgetApp extends Application {
 		mark4 = new BasicMarker(5L, new Point2D.Double(22.7, 60.4522),
 				"Test marker 4");
 
+		googleMap.addListener(new MarkerClickListener() {
+			@Override
+			public void markerClicked(Marker clickedMarker) {
+				if (clickedMarker.getIconUrl() != null
+						&& clickedMarker.getIconUrl().contains("green")) {
+					((BasicMarker) clickedMarker)
+							.setIconUrl("VAADIN/themes/reindeer/icon/red.png");
+				} else {
+					((BasicMarker) clickedMarker)
+							.setIconUrl("VAADIN/themes/reindeer/icon/green.png");
+				}
+				googleMap.requestRepaint();
+			}
+		});
+
 		// Marker with information window pupup
 		mark5 = new BasicMarker(6L, new Point2D.Double(22.8, 60.4522),
-				"Marker 5");
+				"Marker 5öäåÖÄÅ'\"");
 		mark5.setInfoWindowContent(googleMap, new Label("Hello Marker 5!"));
 
 		Label content = new Label("Hello Marker 2!");
@@ -88,6 +107,19 @@ public class GoogleMapWidgetApp extends Application {
 						Notification.TYPE_TRAY_NOTIFICATION);
 			}
 		});
+
+		googleMap.addListener(new GoogleMap.MapMoveListener() {
+			@Override
+			public void mapMoved(int newZoomLevel, Point2D.Double newCenter,
+					Point2D.Double boundsNE, Point2D.Double boundsSW) {
+				getMainWindow().showNotification(
+						"Zoom " + newZoomLevel + " center " + newCenter
+								+ " bounds " + boundsNE + "/" + boundsSW,
+						Notification.TYPE_TRAY_NOTIFICATION);
+			}
+		});
+
+		googleMap.addControl(MapControl.MapTypeControl);
 
 		addTestButtons(); // Add buttons that trigger tests map features
 	}
@@ -134,7 +166,7 @@ public class GoogleMapWidgetApp extends Application {
 				new Button.ClickListener() {
 					@Override
 					public void buttonClick(ClickEvent event) {
-						String chars = new String("asd123.,#€%&öäåÖÄÅ");
+						String chars = new String(".€&åÖ'\"");
 						mark5.setTitle(mark5.getTitle()
 								+ chars.charAt(new Random().nextInt(chars
 										.length())));
@@ -161,9 +193,12 @@ public class GoogleMapWidgetApp extends Application {
 					public void buttonClick(ClickEvent event) {
 						if (mark1.getIconUrl() == null) {
 							mark1.setIconUrl("http://bits.ohloh.net/attachments/18966/v_med.gif");
-							mark1.setIconAnchor(new Point2D.Double(20, -20));
+							mark1.setIconAnchor(null);
+						} else if (mark1.getIconAnchor() == null) {
+							mark1.setIconAnchor(new Point2D.Double(-20, -20));
 						} else {
 							mark1.setIconUrl(null);
+							mark1.setIconAnchor(null);
 						}
 
 						googleMap.requestRepaint();
@@ -241,6 +276,24 @@ public class GoogleMapWidgetApp extends Application {
 								false);
 
 						googleMap.addPolyOverlay(poly);
+					}
+				}));
+
+		grid.addComponent(new Button("Remove first polygon",
+				new Button.ClickListener() {
+					public void buttonClick(ClickEvent event) {
+						Collection<PolyOverlay> overlays = googleMap
+								.getOverlays();
+
+						if (!overlays.isEmpty()) {
+							googleMap.removeOverlay(overlays.iterator().next());
+							getMainWindow().showNotification("Overlay removed",
+									Notification.TYPE_TRAY_NOTIFICATION);
+						} else {
+							getMainWindow().showNotification(
+									"No overlays to remove",
+									Notification.TYPE_TRAY_NOTIFICATION);
+						}
 					}
 				}));
 	}
