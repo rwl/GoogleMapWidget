@@ -5,6 +5,7 @@ import java.util.List;
 import org.vaadin.hezamu.googlemapwidget.GoogleMap;
 
 
+
 public interface MarkerSource {
 	public List<Marker> getMarkers();
 

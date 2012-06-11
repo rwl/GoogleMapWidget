@@ -106,7 +106,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Construct a new instance of the map with given size.
-	 * 
+	 *
 	 * @param application
 	 * @link Application owning this instance.
 	 */
@@ -120,7 +120,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Construct a new instance of the map with given parameters.
-	 * 
+	 *
 	 * @param application
 	 * @link Application owning this instance.
 	 * @param center
@@ -137,7 +137,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Construct a new instance of the map with given size.
-	 * 
+	 *
 	 * @param application
 	 * @link Application owning this instance.
 	 * @param apiKey
@@ -154,7 +154,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Construct a new instance of the map with given parameters.
-	 * 
+	 *
 	 * @param application
 	 * @link Application owning this instance.
 	 * @param center
@@ -271,7 +271,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Receive and handle events and other variable changes from the client.
-	 * 
+	 *
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -372,13 +372,13 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Interface for listening map move and zoom events.
-	 * 
+	 *
 	 * @author Henri Muurimaa
 	 */
 	public interface MapMoveListener {
 		/**
 		 * Handle a MapMoveEvent.
-		 * 
+		 *
 		 * @param newZoomLevel
 		 *            New zoom level
 		 * @param newCenter
@@ -394,53 +394,53 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Interface for listening map click events.
-	 * 
+	 *
 	 * @author Henri Muurimaa
 	 */
 	public interface MapClickListener {
 		/**
 		 * Handle a MapClickEvent.
-		 * 
+		 *
 		 * @param clickPos
 		 *            coordinates of the click event.
-		 * 
+		 *
 		 */
 		public void mapClicked(Point2D.Double clickPos);
 	}
 
 	/**
 	 * Interface for listening marker click events.
-	 * 
+	 *
 	 */
 	public interface MarkerClickListener {
 		/**
 		 * Handle a MarkerClickEvent.
-		 * 
+		 *
 		 * @param clickedMarker
 		 *            the marker that was clicked.
-		 * 
+		 *
 		 */
 		public void markerClicked(Marker clickedMarker);
 	}
 
 	/**
 	 * Interface for listening marker move events.
-	 * 
+	 *
 	 */
 	public interface MarkerMovedListener {
 		/**
 		 * Handle a MarkerMovedEvent.
-		 * 
+		 *
 		 * @param movedMarker
 		 *            the marker that was moved.
-		 * 
+		 *
 		 */
 		public void markerMoved(Marker movedMarker);
 	}
 
 	/**
 	 * Register a new {@link MapClickListener}.
-	 * 
+	 *
 	 * @param listener
 	 *            new {@link MapClickListener} to register
 	 */
@@ -452,7 +452,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Deregister a {@link MapClickListener}.
-	 * 
+	 *
 	 * @param listener
 	 *            {@link MapClickListener} to deregister
 	 */
@@ -464,7 +464,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Register a new {@link MapMoveListener}.
-	 * 
+	 *
 	 * @param listener
 	 *            new {@link MapMoveListener} to register
 	 */
@@ -476,12 +476,12 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Register a new {@link MarkerMovedListener}.
-	 * 
+	 *
 	 * NOTE!! The marker that is clicked MUST have some information window
 	 * content! This is due to the implementation of the Widget, as the marker
 	 * click events do not propagate if there is not a information window
 	 * opened.
-	 * 
+	 *
 	 * @param listener
 	 *            new {@link MarkerClickListener} to register
 	 */
@@ -493,9 +493,9 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Register a new {@link MarkerMovedListener}.
-	 * 
-	 * 
-	 * 
+	 *
+	 *
+	 *
 	 * @param listener
 	 *            new {@link MarkerMovedListener} to register
 	 */
@@ -507,7 +507,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Deregister a {@link MapMoveListener}.
-	 * 
+	 *
 	 * @param listener
 	 *            {@link MapMoveListener} to deregister
 	 */
@@ -519,7 +519,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Deregister a {@link MarkerClickListener}.
-	 * 
+	 *
 	 * @param listener
 	 *            {@link MarkerClickListener} to deregister
 	 */
@@ -531,7 +531,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Deregister a {@link MarkerMovedListener}.
-	 * 
+	 *
 	 * @param listener
 	 *            the {@link MarkerMovedListener} to deregister
 	 */
@@ -543,7 +543,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Get current center coordinates of the map.
-	 * 
+	 *
 	 * @return
 	 */
 	public Point2D.Double getCenter() {
@@ -553,7 +553,7 @@ public class GoogleMap extends AbstractComponent {
 	/**
 	 * Set the current center coordinates of the map. This method can be used to
 	 * pan the map programmatically.
-	 * 
+	 *
 	 * @param center
 	 *            the new center coordinates
 	 */
@@ -564,7 +564,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Get the current zoom level of the map.
-	 * 
+	 *
 	 * @return the current zoom level
 	 */
 	public int getZoom() {
@@ -574,7 +574,7 @@ public class GoogleMap extends AbstractComponent {
 	/**
 	 * Set the zoom level of the map. This method can be used to zoom the map
 	 * programmatically.
-	 * 
+	 *
 	 * @param zoom
 	 */
 	public void setZoom(int zoom) {
@@ -585,7 +585,7 @@ public class GoogleMap extends AbstractComponent {
 	/**
 	 * Set the level of verbosity the client side uses for tracing or displaying
 	 * error messages.
-	 * 
+	 *
 	 * @param level
 	 */
 	public void setClientLogLevel(int level) {
@@ -603,7 +603,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Get the coordinates of the north-east corner of the map.
-	 * 
+	 *
 	 * @return
 	 */
 	public Point2D.Double getBoundsNE() {
@@ -612,7 +612,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Get the coordinates of the south-west corner of the map.
-	 * 
+	 *
 	 * @return
 	 */
 	public Point2D.Double getBoundsSW() {
@@ -621,7 +621,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Set the {@link MarkerSource} for the map.
-	 * 
+	 *
 	 * @param markerSource
 	 */
 	public void setMarkerSource(MarkerSource markerSource) {
@@ -639,10 +639,10 @@ public class GoogleMap extends AbstractComponent {
 	/**
 	 * Add a new {@link PolyOverlay} to the map. Does nothing if the overlay
 	 * already exist on the map.
-	 * 
+	 *
 	 * @param overlay
 	 *            {@link PolyOverlay} to add
-	 * 
+	 *
 	 * @return True if the overlay was added.
 	 */
 	public boolean addPolyOverlay(PolyOverlay overlay) {
@@ -658,10 +658,10 @@ public class GoogleMap extends AbstractComponent {
 	/**
 	 * Update a {@link PolyOverlay} on the map. Does nothing if the overlay does
 	 * not exist on the map.
-	 * 
+	 *
 	 * @param overlay
 	 *            {@link PolyOverlay} to update
-	 * 
+	 *
 	 * @return True if the overlay was updated.
 	 */
 	public boolean updateOverlay(PolyOverlay overlay) {
@@ -677,10 +677,10 @@ public class GoogleMap extends AbstractComponent {
 	/**
 	 * Remove a {@link PolyOverlay} from the map. Does nothing if the overlay
 	 * does not exist on the map.
-	 * 
+	 *
 	 * @param overlay
 	 *            {@link PolyOverlay} to remove
-	 * 
+	 *
 	 * @return True if the overlay was removed.
 	 */
 	public boolean removeOverlay(PolyOverlay overlay) {
@@ -695,7 +695,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Get the collection of {@link PolyOverlay}s currently in the map.
-	 * 
+	 *
 	 * @return a {@link Collection} of overlays.
 	 */
 	public Collection<PolyOverlay> getOverlays() {
@@ -723,7 +723,7 @@ public class GoogleMap extends AbstractComponent {
 	/**
 	 * Add a Marker to the current MarkerSource. If the map has no marker source
 	 * a new {@link BasicMarkerSource} is created.
-	 * 
+	 *
 	 * @param marker
 	 *            Marker to add
 	 */
@@ -738,7 +738,7 @@ public class GoogleMap extends AbstractComponent {
 
 	/**
 	 * Removes the marker from the map
-	 * 
+	 *
 	 * @param marker
 	 */
 	public void removeMarker(Marker marker) {

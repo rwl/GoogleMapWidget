@@ -4,12 +4,12 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Random;
 
-import org.vaadin.hezamu.googlemapwidget.GoogleMap.MapControl;
-import org.vaadin.hezamu.googlemapwidget.GoogleMap.MarkerClickListener;
 import org.vaadin.hezamu.googlemapwidget.overlay.BasicMarker;
 import org.vaadin.hezamu.googlemapwidget.overlay.Marker;
 import org.vaadin.hezamu.googlemapwidget.overlay.PolyOverlay;
 import org.vaadin.hezamu.googlemapwidget.overlay.Polygon;
+import org.vaadin.hezamu.googlemapwidget.GoogleMap.MarkerClickListener;
+import org.vaadin.hezamu.googlemapwidget.GoogleMap.MapControl;
 
 import com.vaadin.Application;
 import com.vaadin.ui.Button;
@@ -73,7 +73,7 @@ public class GoogleMapWidgetApp extends Application {
 
 		// Marker with information window pupup
 		mark5 = new BasicMarker(6L, new Point2D.Double(22.8, 60.4522),
-				"Marker 5öäåÖÄÅ'\"");
+				"Marker 5ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ'\"");
 		mark5.setInfoWindowContent(googleMap, new Label("Hello Marker 5!"));
 
 		Label content = new Label("Hello Marker 2!");
@@ -166,7 +166,7 @@ public class GoogleMapWidgetApp extends Application {
 				new Button.ClickListener() {
 					@Override
 					public void buttonClick(ClickEvent event) {
-						String chars = new String(".€&åÖ'\"");
+						String chars = new String(".ÔøΩ&ÔøΩÔøΩ'\"");
 						mark5.setTitle(mark5.getTitle()
 								+ chars.charAt(new Random().nextInt(chars
 										.length())));

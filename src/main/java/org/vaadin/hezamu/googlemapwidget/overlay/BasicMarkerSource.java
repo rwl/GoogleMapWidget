@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.vaadin.hezamu.googlemapwidget.GoogleMap;
 
+
 public class BasicMarkerSource implements MarkerSource, Serializable {
 	private static final long serialVersionUID = -803448463650898130L;
 
